@@ -9,7 +9,14 @@ app.get("/", (req, res) => {
   res.json({ message: "Backend Express berjalan!" });
 });
 
-const PORT = 3000;
+// Route
+// const tasksRoute = require("./routes/tasks");
+// app.use("/tasks", tasksRoute);
+
+const employeeRoutes = require("./routes/employeeRoutes");
+app.use("/employees", employeeRoutes);
+
+const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server berjalan di http://localhost:${PORT}`);
 });
