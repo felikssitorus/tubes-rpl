@@ -13,7 +13,7 @@ export default function Dashboard() {
   ];
 
   const handleClick = (label) => {
-    alert("Masuk ke kelas: " + label); // harusnya ini muncul
+    alert("Masuk ke kelas: " + label);
   };
 
   return (
