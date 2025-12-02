@@ -1,4 +1,3 @@
-import { createSignal } from "solid-js";
 import DashboardGrid from "./DashboardGrid";
 import SemesterInfo from "./SemesterInfo";
 
@@ -19,13 +18,8 @@ export default function Dashboard() {
   return (
     <div class="container p-4">
       <h1 class="text-2xl font-bold mb-4">Daftar Kelas</h1>
-
       <DashboardGrid classes={classes} onSelect={handleClick} />
-
-      <SemesterInfo 
-        year="Tahun Akademik 2025/2026"
-        semester="Semester Ganjil"
-      />
+      <SemesterInfo year="Tahun Akademik 2025/2026" semester="Semester Ganjil" />
     </div>
   );
 }
