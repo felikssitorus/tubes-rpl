@@ -6,8 +6,8 @@ import {
   deleteEmployee
 } from "../../services/EmployeeService";
 
-import EmployeeList from "../../components/EmployeeList";
-import EmployeeForm from "../../components/EmployeeForm";
+import EmployeeList from "../../components/employees/EmployeeList";
+import EmployeeForm from "../../components/employees/EmployeeForm";
 
 export default function EmployeePage() {
   const [employees, { refetch }] = createResource(getEmployees);
@@ -30,7 +30,9 @@ export default function EmployeePage() {
   };
 
   return (
+
     <div>
+
       <h1>Employees</h1>
 
       <EmployeeForm employee={selected()} onSaved={refetch} />
