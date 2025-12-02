@@ -6,9 +6,9 @@ export default function MenuPage() {
     const [open, setOpen] = useState(false);
 
     return (
-        <div className="container">
+        <div class="container">
 
-            <div className="menu-list">
+            <div class="menu-list">
                 <MenuItem 
                     text="Kelola Kelompok Tugas Besar"
                     onClick={() => setOpen(true)}
