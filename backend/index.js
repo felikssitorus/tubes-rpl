@@ -9,12 +9,12 @@ app.get("/", (req, res) => {
   res.json({ message: "Backend Express berjalan!" });
 });
 
-// Route
-// const tasksRoute = require("./routes/tasks");
-// app.use("/tasks", tasksRoute);
 
 const employeeRoutes = require("./routes/employeeRoutes");
 app.use("/employees", employeeRoutes);
+
+const komponenRoutes = require("./routes/komponenRoutes");
+app.use("/komponen", komponenRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => {
