@@ -1,11 +1,11 @@
 import ClassCard from "./ClassCard";
 
-export default function DashboardGrid({ classes, onSelect }) {
-    return (
-        <div className="class-grid">
-            {classes.map((kelas, i) => (
-                <ClassCard key={i} label={kelas} onClick={onSelect} />
-            ))}
-        </div>
-    );
+export default function DashboardGrid(props) {
+  return (
+    <div class="grid grid-cols-3 gap-4">
+      {props.classes.map((kelas) => (
+        <ClassCard label={kelas} onClick={props.onSelect} />
+      ))}
+    </div>
+  );
 }

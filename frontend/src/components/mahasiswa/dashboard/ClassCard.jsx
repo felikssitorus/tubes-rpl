@@ -1,8 +1,12 @@
-export default function ClassCard({ label, onClick }) {
-    return (
-        <div className="class-card" onClick={() => onClick(label)}>
-            <div className="card-image"></div>
-            <div className="card-label">{label}</div>
-        </div>
-    );
+export default function ClassCard(props) {
+  const handleClick = () => props.onClick(props.label);
+
+  return (
+    <div
+      class="p-4 border rounded shadow cursor-pointer hover:bg-gray-100"
+      onClick={handleClick}
+    >
+      {props.label}
+    </div>
+  );
 }
