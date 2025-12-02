@@ -1,3 +1,4 @@
+import { createSignal } from "solid-js";
 import DashboardGrid from "./DashboardGrid";
 import SemesterInfo from "./SemesterInfo";
 
@@ -12,7 +13,7 @@ export default function Dashboard() {
   ];
 
   const handleClick = (label) => {
-    alert("Masuk ke kelas: " + label);
+    alert("Masuk ke kelas: " + label); // harusnya ini muncul
   };
 
   return (
