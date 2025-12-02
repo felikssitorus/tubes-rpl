@@ -27,7 +27,7 @@ export default function Header(props) {
             </svg>
           </button>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center">
             <img src={logo} alt="Logo" class="w-10 h-10 object-contain" />
             <h1 class="font-bold text-xl tracking-wider uppercase">TUBESKU</h1>
           </div>
