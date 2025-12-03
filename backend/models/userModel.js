@@ -11,6 +11,4 @@ const getAll = async () => {
   const result = await pool.query("SELECT * FROM users");
   return result.rows;
 };
-
-// Ekspor kedua fungsi
 module.exports = { getByEmail, getAll };
