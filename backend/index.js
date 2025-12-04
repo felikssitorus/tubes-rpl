@@ -7,19 +7,16 @@ app.use(express.json());
 
 // Test endpoint
 app.get("/", (req, res) => {
-  res.json({ message: "Backend Express berjalan!" });
+  res.json({ message: "Backend berjalan!" });
 });
 
-// Routes fitur lain
-const employeeRoutes = require("./routes/employeeRoutes");
-app.use("/employees", employeeRoutes);
-
-const komponenRoutes = require("./routes/komponenRoutes");
-app.use("/komponen", komponenRoutes);
-
-// Route login
+// Routes
 const userRoutes = require("./routes/userRoutes");
 app.use("/user", userRoutes);
+
+// ROUTES BARU: MK DIAMBIL
+const mkDiambilRoutes = require("./routes/mkDiambilRoutes");
+app.use("/mk-diambil", mkDiambilRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => {

@@ -15,7 +15,7 @@ export default function LoginForm() {
     try {
       const response = await loginUser(email(), password());
       toast.success(`Selamat datang, ${response.user.name}`);
-      navigate("/"); // redirect ke dashboard
+      navigate("/dashboard"); // redirect ke dashboard
     } catch (err) {
       toast.error(err.message || "Login gagal");
     } finally {
