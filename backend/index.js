@@ -18,6 +18,10 @@ app.use("/user", userRoutes);
 const mkDiambilRoutes = require("./routes/mkDiambilRoutes");
 app.use("/mk-diambil", mkDiambilRoutes);
 
+// ROUTES BARU: MENGAJAR
+const mengajarRoutes = require("./routes/mengajarRoutes");
+app.use("/mengajar", mengajarRoutes);
+
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server berjalan di http://localhost:${PORT}`);

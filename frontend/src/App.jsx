@@ -4,12 +4,14 @@ import { Router, Route } from "@solidjs/router";
 // import KomponenPage from "./pages/komponen/KomponenPage.jsx";
 import LoginPage from "./pages/login/loginPage.jsx";
 import DashboardPage from "./pages/dashboard/dashboardPage.jsx";
+import MenuPage from "./pages/menu/menuPage";
 
 export default function App() {
   return (
     <Router>
       <Route path="/login" component={LoginPage} />
       <Route path="/dashboard" component={DashboardPage} />
+      <Route path="/menu/:courseCode" component={MenuPage} />
     </Router>
   );
 }

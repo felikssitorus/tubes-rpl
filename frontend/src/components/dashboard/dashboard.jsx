@@ -1,14 +1,21 @@
 import { For } from "solid-js";
+import { useNavigate } from "@solidjs/router";
 
 const Dashboard = (props) => {
   const { mataKuliah } = props;
+  const navigate = useNavigate();
 
   return (
     <div>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-h-[600px] overflow-y-auto">
         <For each={mataKuliah}>
           {(mk) => (
-            <div class="class-card flex flex-col h-40 bg-white rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-transform transform hover:-translate-y-1">
+            <div
+              class="class-card flex flex-col h-40 bg-white rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-transform transform hover:-translate-y-1"
+              onClick={() =>
+                navigate(`/menu/${encodeURIComponent(mk.nama_mata_kuliah)}`)
+              }
+            >
               <div class="flex-2 bg-gradient-to-b from-indigo-600 to-indigo-900"></div>
               <div class="flex-1 bg-gray-300 flex items-center justify-center font-bold text-black">
                 {mk.nama_mata_kuliah}
