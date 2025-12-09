@@ -1,10 +1,8 @@
 import { Router, Route } from "@solidjs/router";
-
-// import EmployeePage from "./pages/employees/EmployeePage.jsx";
-// import KomponenPage from "./pages/komponen/KomponenPage.jsx";
 import LoginPage from "./pages/login/loginPage.jsx";
 import DashboardPage from "./pages/dashboard/dashboardPage.jsx";
-import MenuPage from "./pages/menu/menuPage";
+import MenuPage from "./pages/menu/menuPage.jsx";
+import KelompokPage from "./pages/kelompok/kelompokPage.jsx";
 
 export default function App() {
   return (
@@ -12,6 +10,7 @@ export default function App() {
       <Route path="/login" component={LoginPage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/menu/:courseCode" component={MenuPage} />
+      <Route path="/kelompok/:courseId" component={KelompokPage} />
     </Router>
   );
 }

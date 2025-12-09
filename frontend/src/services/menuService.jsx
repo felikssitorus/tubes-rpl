@@ -18,8 +18,13 @@ export async function getCourseInfo(courseCode) {
 
     if (course.length === 0) throw new Error("Mata kuliah tidak ditemukan");
 
-    const lecturers = course.map((item) => item.nama);
+    // ambil nama dosen
+    const dosen = course.map((item) => item.nama);
 
+    // ambil id mk dibuka
+    const idMkDibuka = course[0].id_mk_dibuka;
+
+    // menu
     const menus = [
       { label: "Pembagian Kelompok Tugas Besar", page: "pembagian-kelompok" },
       { label: "Nilai", page: "nilai" },
@@ -27,8 +32,9 @@ export async function getCourseInfo(courseCode) {
 
     return {
       courseCode: decodedCourseCode,
-      lecturers,
+      dosen,
       menus,
+      idMkDibuka,
     };
   } catch (err) {
     throw err;
