@@ -30,7 +30,7 @@ const getKelompokByMahasiswa = async (idMkDibuka, npm) => {
 // Join kelompok mahasiswa
 const joinKelompok = async (idMkDibuka, namaKelompok, npm) => {
   try {
-    // Cari id_kelompok dari idMkDibuka dan namaKelompok
+    // Ambil id_kelompok & id_tubes berdasarkan nama kelompok + mk_dibuka
     const idKelompokQuery = `
       SELECT k.id_kelompok, k.id_tubes
       FROM kelompok k
@@ -42,28 +42,31 @@ const joinKelompok = async (idMkDibuka, namaKelompok, npm) => {
 
     const { id_kelompok, id_tubes } = rows[0];
 
-    // Cek apakah mahasiswa sudah tergabung di kelompok manapun di tugas ini
-    const cekKelompokLainQuery = `
-      SELECT ak.*
-      FROM anggota_kelompok ak
-      JOIN kelompok k ON ak.id_kelompok = k.id_kelompok
-      WHERE ak.npm = $1 AND k.id_tubes = $2
-    `;
-    const cek = await pool.query(cekKelompokLainQuery, [npm, id_tubes]);
-    if (cek.rows.length > 0) {
-      return { success: false, message: "Mahasiswa sudah tergabung di kelompok lain untuk tugas ini" };
-    }
+    // 🧹 Hapus keanggotaan lain mahasiswa dalam id_tubes yang sama (agar bisa pindah)
+    await pool.query(
+      `
+      DELETE FROM anggota_kelompok
+      WHERE npm = $1 AND id_kelompok IN (
+        SELECT id_kelompok FROM kelompok WHERE id_tubes = $2
+      )
+      `,
+      [npm, id_tubes]
+    );
 
-    // Insert anggota
-    const insertQuery = `INSERT INTO anggota_kelompok (npm, id_kelompok) VALUES ($1, $2)`;
-    await pool.query(insertQuery, [npm, id_kelompok]);
-    return { success: true, message: "Berhasil join kelompok" };
+    // Tambahkan mahasiswa ke kelompok baru
+    await pool.query(
+      `INSERT INTO anggota_kelompok (npm, id_kelompok) VALUES ($1, $2)`,
+      [npm, id_kelompok]
+    );
+
+    return { success: true, message: "Berhasil bergabung ke kelompok baru" };
 
   } catch (err) {
     console.error("ERROR joinKelompok:", err);
     return { success: false, message: "Terjadi kesalahan server" };
   }
 };
+
 
 module.exports = {
   getKelompokByMataKuliah,

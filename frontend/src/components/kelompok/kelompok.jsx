@@ -1,51 +1,73 @@
+// File: src/components/Kelompok.jsx
 import { createSignal, onMount, For } from "solid-js";
 import axios from "axios";
 
 const BASE_URL = "http://localhost:5000/kelompok";
-const TUBES_URL = "http://localhost:5000/tubes/mk"; // endpoint topik tubes
+const TUBES_URL = "http://localhost:5000/tubes/mk";
 
 const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
-  const [kelompokData, setKelompokData] = createSignal({});
-  const [kelompokSaya, setKelompokSaya] = createSignal([]);
-  const [selectedKelompok, setSelectedKelompok] = createSignal("");
-
   const [tubesList, setTubesList] = createSignal([]);
   const [selectedTubes, setSelectedTubes] = createSignal("");
+
+  const [kelompokData, setKelompokData] = createSignal({});
+  const [selectedKelompok, setSelectedKelompok] = createSignal("");
+  const [kelompokSaya, setKelompokSaya] = createSignal([]);
 
   if (!npm) {
     alert("Data user tidak ditemukan. Silakan login ulang.");
   }
 
+  // ===============================
+  // LOAD LIST TUBES BERDASARKAN MK
+  // ===============================
   onMount(async () => {
-    if (!idMkDibuka || !npm) return;
+    if (!idMkDibuka) return;
 
     try {
-      // Fetch data kelompok
-      const { data } = await axios.get(`${BASE_URL}/${idMkDibuka}`);
-      setKelompokData(data);
-
-      const resMyGroup = await axios.get(`${BASE_URL}/${idMkDibuka}/mahasiswa/${npm}`);
-      if (resMyGroup.data) {
-        const myGroupName = resMyGroup.data.nama_kelompok;
-        setSelectedKelompok(myGroupName);
-
-        const anggota = data[myGroupName]?.map(a => a.nama) || [];
-        setKelompokSaya([...anggota]);
-      }
-
-      // Fetch topik tubes
       const tubesRes = await axios.get(`${TUBES_URL}/${idMkDibuka}`);
       if (tubesRes.data?.tubes) {
         setTubesList(tubesRes.data.tubes);
       }
     } catch (err) {
-      console.error("Gagal load data kelompok atau tubes:", err);
-      alert("Gagal mengambil data. Refresh halaman.");
+      console.error("Gagal mengambil data tubes:", err);
+      alert("Gagal mengambil daftar topik tubes.");
     }
   });
 
+  // =========================
+  // SAAT USER PILIH TUBES
+  // =========================
+  const handleSelectTubes = async (id_tubes) => {
+    setSelectedTubes(id_tubes);
+    setSelectedKelompok("");
+    setKelompokSaya([]);
+    setKelompokData({});
+
+    try {
+      const kel = await axios.get(`${BASE_URL}/tubes/${id_tubes}`);
+      // Kalau data kosong, buat placeholder agar radio button tetap muncul
+      if (Object.keys(kel.data).length === 0) {
+        setKelompokData({ "Belum ada kelompok": [] });
+      } else {
+        setKelompokData(kel.data);
+      }
+
+      const myGroup = await axios.get(`${BASE_URL}/tubes/${id_tubes}/mahasiswa/${npm}`);
+      if (myGroup.data?.nama_kelompok) {
+        setSelectedKelompok(myGroup.data.nama_kelompok);
+        setKelompokSaya(myGroup.data.anggota?.map(a => a.nama) || []);
+      }
+    } catch (err) {
+      console.error("Gagal load kelompok:", err);
+      setKelompokData({ "Belum ada kelompok": [] });
+    }
+  };
+
+  // =========================
+  // JOIN KELOMPOK
+  // =========================
   const handleJoinKelompok = async (kelompokName) => {
-    if (!idMkDibuka || !kelompokName || !npm) {
+    if (!selectedTubes() || !kelompokName || !npm) {
       alert("Data untuk join kelompok tidak lengkap!");
       return;
     }
@@ -54,7 +76,7 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
 
     try {
       const res = await axios.post(`${BASE_URL}/join`, {
-        idMkDibuka,
+        idTubes: selectedTubes(),
         namaKelompok: kelompokName,
         npm
       });
@@ -76,16 +98,16 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
   };
 
   return (
-    <div class="container mx-auto p-6 flex flex-col ">
+    <div class="container mx-auto p-6 flex flex-col">
 
       {/* Dropdown Topik Tubes */}
       <div class="w-8/9 max-w-5xl">
         <select
           class="w-full p-2 border border-black rounded"
           value={selectedTubes()}
-          onChange={(e) => setSelectedTubes(e.target.value)}
+          onChange={(e) => handleSelectTubes(e.target.value)}
         >
-          <option value="" disabled selected>Tubes</option>
+          <option value="" disabled>Pilih Topik Tugas Besar</option>
           <For each={tubesList()}>
             {(tube) => (
               <option value={tube.id_tubes}>{tube.topik_tubes}</option>
@@ -94,27 +116,23 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
         </select>
       </div>
 
-      {/* Judul dengan gradient dan border */}
-      <h1
-        class="mt-4 menu-item w-8/9 max-w-5xl text-xl font-bold p-4 text-white 
-               bg-[#637AB9]
-               border border-black m-0"
-      >
+      <h1 class="mt-4 menu-item w-8/9 max-w-5xl text-xl font-bold p-4 text-white 
+               bg-[#637AB9] border border-black m-0">
         Pembagian Kelompok Tugas Besar
       </h1>
 
-      {/* Radio Button Vertical dengan border dan border-radius */}
-      <div class="  menu-item w-8/9 max-w-5xl flex flex-col gap-2 p-4 border border-black">
+      {/* Radio Kelompok */}
+      <div class="menu-item w-8/9 max-w-5xl flex flex-col gap-2 p-4 border border-black">
         <For each={Object.keys(kelompokData())}>
           {(kelompokName) => (
             <label class="flex items-center gap-2 cursor-pointer m-0">
               <input
                 type="radio"
-                name="kelompok"
+                name={`kelompok-${selectedTubes()}`} // unik per tubes
                 value={kelompokName}
                 checked={selectedKelompok() === kelompokName}
                 onChange={() => handleJoinKelompok(kelompokName)}
-                class="form-radio"
+                disabled={kelompokName === "Belum ada kelompok"} // disable jika placeholder
               />
               <span>{kelompokName}</span>
             </label>
@@ -122,16 +140,14 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
         </For>
       </div>
 
-      {/* Kelompok Saya dengan jarak dan gradient */}
+      {/* Kelompok Saya */}
       <div class="mt-4">
         <h2 class="menu-item w-8/9 max-w-5xl text-white font-semibold
-        bg-[#637AB9]
-        p-4 mb-0">Kelompok Saya</h2>
-        <ul class="list-disc list-inside
-        p-4
-        mt-0
-        border border-black
-        menu-item w-8/9 max-w-5xl">
+        bg-[#637AB9] p-4 mb-0">
+          Kelompok Saya
+        </h2>
+
+        <ul class="list-disc list-inside p-4 mt-0 border border-black menu-item w-8/9 max-w-5xl">
           <For each={kelompokSaya()}>
             {(anggota) => <li>{anggota}</li>}
           </For>
