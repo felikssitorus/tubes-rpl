@@ -101,6 +101,7 @@ export default function AssignPage() {
         </div>
 
         <Show when={!mahasiswaData.loading && !kelompokData.loading}>
+          {/* Daftar Kelompok */}
           <div class="mb-6">
             <div class="bg-white border rounded-lg overflow-hidden">
               <For each={kelompokData() || []}>
@@ -127,6 +128,7 @@ export default function AssignPage() {
             </div>
           </div>
 
+          {/* Daftar Mahasiswa */}
           <Show when={selectedKelompok()}>
             <div class="mb-6">
               <h3 class="text-lg font-semibold text-gray-800 mb-3">Nama Mahasiswa</h3>

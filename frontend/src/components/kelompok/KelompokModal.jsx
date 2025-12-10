@@ -19,8 +19,6 @@ export default function KelompokModal(props) {
     };
 
     props.onSave(payload);
-    
-    // Reset form
     setJumlahKelompok("");
     setJumlahAnggota("");
   };
@@ -41,7 +39,7 @@ export default function KelompokModal(props) {
             <form onSubmit={handleSubmit} class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Jumlah Kelompok
+                  Jumlah Kelompok 
                 </label>
                 <input
                   type="number"
@@ -56,7 +54,7 @@ export default function KelompokModal(props) {
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Jumlah Anggota per Kelompok
+                  Jumlah Anggota per Kelompok 
                 </label>
                 <input
                   type="number"

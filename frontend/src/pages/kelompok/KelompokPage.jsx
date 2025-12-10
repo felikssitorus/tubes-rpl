@@ -1,5 +1,5 @@
-import { createResource, createSignal, Show, createEffect, onMount, For } from "solid-js";
-import { useNavigate, useParams, useLocation } from "@solidjs/router";
+import { createResource, createSignal, Show, createEffect, For } from "solid-js";
+import { useNavigate, useParams } from "@solidjs/router";
 import toast, { Toaster } from "solid-toast";
 
 import { getKelompokByTubes, generateKelompok, getKelompokById } from "../../services/kelompokService";
@@ -10,7 +10,6 @@ import Header from "../../components/layout/Header";
 export default function KelompokPage() {
   const params = useParams();
   const navigate = useNavigate();
-  const location = useLocation(); // ← Tambahkan ini
   const idTubes = () => parseInt(params.id_tubes || 1);
   
   const [data, { refetch }] = createResource(() => getKelompokByTubes(idTubes()));
@@ -18,14 +17,6 @@ export default function KelompokPage() {
   const [isLocked, setIsLocked] = createSignal(false);
   const [selectedKelompok, setSelectedKelompok] = createSignal(null);
   const [detailedData, setDetailedData] = createSignal([]);
-
-  // Refetch setiap kali location berubah (navigasi)
-  createEffect(() => {
-    // Track location change
-    location.pathname;
-    // Refetch data
-    refetch();
-  });
 
   // Load detailed data setiap kali data berubah
   createEffect(async () => {

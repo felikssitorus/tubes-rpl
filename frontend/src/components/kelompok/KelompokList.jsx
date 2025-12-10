@@ -31,7 +31,7 @@ export default function KelompokList(props) {
             </Show>
 
             <Show when={!item.anggota || item.anggota.length === 0}>
-              <p class="text-sm text-gray-400 pt-2 border-t">Belum ada anggota</p>
+              <p class="text-sm text-gray-400 italic pt-2 border-t">Belum ada anggota</p>
             </Show>
           </div>
         )}
