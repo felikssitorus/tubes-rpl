@@ -80,6 +80,8 @@ CREATE TABLE kelompok (
     id_tubes INT REFERENCES tugas_besar(id_tubes),
     nama_kelompok VARCHAR(20)
 );
+ALTER TABLE kelompok
+ADD COLUMN max_anggota INTEGER;
 
 -- ANGGOTA KELOMPOK
 CREATE TABLE anggota_kelompok (
@@ -95,6 +97,8 @@ CREATE TABLE komponen (
     nama_komponen VARCHAR(50),
     bobot_komponen INT CHECK (bobot_komponen > 0 AND bobot_komponen <= 100)
 );
+ALTER TABLE komponen
+ADD COLUMN catatan
 
 -- NILAI
 CREATE TABLE nilai (
@@ -324,13 +328,4 @@ INSERT INTO tugas_besar (id_mk_dibuka, topik_tubes) VALUES
 (8,'Sistem Manajemen Data Kesehatan');
 
 
-INSERT INTO kelompok (id_tubes, nama_kelompok) VALUES
-(1, 'Kelompok 1'), (1, 'Kelompok 2'), (1, 'Kelompok 3'), (1, 'Kelompok 4'),
-(2, 'Kelompok 1'), (2, 'Kelompok 2'), (2, 'Kelompok 3'), (2, 'Kelompok 4'),
-(3, 'Kelompok 1'), (3, 'Kelompok 2'), (3, 'Kelompok 3'), (3, 'Kelompok 4'),
-(4, 'Kelompok 1'), (4, 'Kelompok 2'), (4, 'Kelompok 3'), (4, 'Kelompok 4'),
-(5, 'Kelompok 1'), (5, 'Kelompok 2'), (5, 'Kelompok 3'), (5, 'Kelompok 4'),
-(6, 'Kelompok 1'), (6, 'Kelompok 2'), (6, 'Kelompok 3'), (6, 'Kelompok 4'),
-(7, 'Kelompok 1'), (7, 'Kelompok 2'), (7, 'Kelompok 3'), (7, 'Kelompok 4'),
-(8, 'Kelompok 1'), (8, 'Kelompok 2'), (8, 'Kelompok 3'), (8, 'Kelompok 4');
 
