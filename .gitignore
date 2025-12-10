@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist
+.wrangler
+.output
+.vercel
+.netlify
+.vinxi
+app.config.timestamp_*.js
+
+# Environment
+.env
+.env*.local
+
+# IDEs and editors
+/.idea
+.vscode/
+.project
+.classpath
+*.launch
+.settings/
+*.swp
+*.swo
+*~
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temp files
+*.tmp
+*.temp
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Database
+*.sqlite
+*.db
+
+# Build
+build/
+.vite/
