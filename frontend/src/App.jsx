@@ -15,6 +15,7 @@ export default function App() {
       <Route path="/kelompok/:courseId" component={KelompokPage} />
       <Route path="/komponen" component={KomponenPage} />
       <Route path="/rubrik" component={RubrikPage} />
+      
     </Router>
   );
 }
