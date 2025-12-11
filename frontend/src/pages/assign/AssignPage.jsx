@@ -15,7 +15,7 @@ export default function AssignPage() {
   const [mahasiswaData, { refetch: refetchMahasiswa }] = createResource(
     () => getMahasiswaAvailable(idTubes(), kelas)
   );
-  const [kelompokData] = createResource(() => getKelompokByTubes(idTubes()));
+  const [kelompokData, { refetch: refetchKelompok }] = createResource(() => getKelompokByTubes(idTubes()));
   
   const [selectedKelompok, setSelectedKelompok] = createSignal(null);
   const [selectedMahasiswa, setSelectedMahasiswa] = createSignal([]);
@@ -28,22 +28,22 @@ export default function AssignPage() {
 
   const handleToggleMahasiswa = (npm) => {
     const current = selectedMahasiswa();
-    const maxAnggota = selectedKelompok()?.max_anggota || 4; // Default 4 jika null
-    const currentAnggota = parseInt(selectedKelompok()?.jumlah_anggota || 0);
+    const kelompok = selectedKelompok();
+    
+    if (!kelompok) return;
+    
+    const maxAnggota = parseInt(kelompok.max_anggota || 4);
+    const currentAnggota = parseInt(kelompok.jumlah_anggota || 0);
     
     if (current.includes(npm)) {
-      // Unselect
       setSelectedMahasiswa(current.filter(m => m !== npm));
     } else {
-      // Check if limit reached
       const totalSetelahDitambah = currentAnggota + current.length + 1;
       
       if (totalSetelahDitambah > maxAnggota) {
         toast.error(`Kelompok ini maksimal ${maxAnggota} anggota!`);
         return;
       }
-      
-      // Select
       setSelectedMahasiswa([...current, npm]);
     }
   };
@@ -76,6 +76,7 @@ export default function AssignPage() {
       setSelectedKelompok(null);
       setSelectedMahasiswa([]);
       await refetchMahasiswa();
+      await refetchKelompok(); 
       
     } catch (error) {
       console.error("Error:", error);
@@ -101,7 +102,6 @@ export default function AssignPage() {
         </div>
 
         <Show when={!mahasiswaData.loading && !kelompokData.loading}>
-          {/* Daftar Kelompok */}
           <div class="mb-6">
             <div class="bg-white border rounded-lg overflow-hidden">
               <For each={kelompokData() || []}>
@@ -115,7 +115,7 @@ export default function AssignPage() {
                     }`}
                   >
                     <span class="font-medium">
-                      {kelompok.nama_kelompok} ({kelompok.jumlah_anggota || 0} Orang)
+                      {kelompok.nama_kelompok} ({kelompok.jumlah_anggota || 0}/{kelompok.max_anggota || 4} Orang)
                     </span>
                     <Show when={selectedKelompok()?.id_kelompok === kelompok.id_kelompok}>
                       <div class="w-6 h-6 bg-white rounded-full flex items-center justify-center">
@@ -128,7 +128,6 @@ export default function AssignPage() {
             </div>
           </div>
 
-          {/* Daftar Mahasiswa */}
           <Show when={selectedKelompok()}>
             <div class="mb-6">
               <h3 class="text-lg font-semibold text-gray-800 mb-3">Nama Mahasiswa</h3>
@@ -168,7 +167,6 @@ export default function AssignPage() {
               </Show>
             </div>
 
-            {/* Tombol Konfirm */}
             <Show when={selectedMahasiswa().length > 0}>
               <div class="flex justify-end">
                 <button

@@ -3,8 +3,6 @@ import { For, Show, createSignal } from "solid-js";
 export default function AssignMahasiswaList(props) {
   const mahasiswa = () => props.data || [];
   const kelompok = () => props.kelompok || [];
-  
-  // Local state untuk track assignment setiap mahasiswa
   const [assignments, setAssignments] = createSignal({});
 
   const handleSelectKelompok = (npm, id_kelompok) => {
@@ -17,10 +15,7 @@ export default function AssignMahasiswaList(props) {
   const getSelectedKelompok = (npm) => {
     return assignments()[npm] || "";
   };
-
-  // Expose assignments ke parent
   props.onAssignmentsChange && props.onAssignmentsChange(assignments);
-
   return (
     <div class="space-y-3">
       <Show when={mahasiswa().length === 0}>
@@ -51,9 +46,7 @@ export default function AssignMahasiswaList(props) {
                 <option value="" disabled>Pilih Kelompok</option>
                 <For each={kelompok()}>
                   {(kel) => (
-                    <option value={kel.id_kelompok}>
-                      {kel.nama_kelompok} ({kel.jumlah_anggota} orang)
-                    </option>
+                    <option value={kel.id_kelompok}>{kel.nama_kelompok} ({kel.jumlah_anggota} orang)</option>
                   )}
                 </For>
               </select>

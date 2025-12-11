@@ -38,9 +38,7 @@ export default function KelompokModal(props) {
             
             <form onSubmit={handleSubmit} class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  Jumlah Kelompok 
-                </label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Kelompok</label>
                 <input
                   type="number"
                   value={jumlahKelompok()}
@@ -78,9 +76,7 @@ export default function KelompokModal(props) {
                 <button
                   type="submit"
                   class="flex-1 px-4 py-2 bg-[#465EBE] text-white rounded-lg hover:bg-[#3b4fa8] transition-colors"
-                >
-                  Simpan
-                </button>
+                >Simpan</button>
               </div>
             </form>
           </div>

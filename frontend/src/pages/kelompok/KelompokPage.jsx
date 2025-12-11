@@ -2,9 +2,18 @@ import { createResource, createSignal, Show, createEffect, For } from "solid-js"
 import { useNavigate, useParams } from "@solidjs/router";
 import toast, { Toaster } from "solid-toast";
 
-import { getKelompokByTubes, generateKelompok, getKelompokById } from "../../services/kelompokService";
+import { 
+  getKelompokByTubes, 
+  generateKelompok, 
+  getKelompokById,
+  updateMaxAnggota,
+  removeAnggota,
+  getLockStatus,
+  lockTubes
+} from "../../services/kelompokService";
 import KelompokList from "../../components/kelompok/KelompokList";
 import KelompokModal from "../../components/kelompok/KelompokModal";
+import EditKelompokModal from "../../components/kelompok/EditKelompokModal";
 import Header from "../../components/layout/Header";
 
 export default function KelompokPage() {
@@ -13,10 +22,18 @@ export default function KelompokPage() {
   const idTubes = () => parseInt(params.id_tubes || 1);
   
   const [data, { refetch }] = createResource(() => getKelompokByTubes(idTubes()));
+  const [lockStatusData, { refetch: refetchLockStatus }] = createResource(() => getLockStatus(idTubes()));
+  
   const [open, setOpen] = createSignal(false);
-  const [isLocked, setIsLocked] = createSignal(false);
   const [selectedKelompok, setSelectedKelompok] = createSignal(null);
+  const [editKelompok, setEditKelompok] = createSignal(null);
   const [detailedData, setDetailedData] = createSignal([]);
+
+  // Reactive isLocked dari database - dengan default false jika loading
+  const isLocked = () => {
+    const status = lockStatusData();
+    return status?.is_locked === true;
+  };
 
   // Load detailed data setiap kali data berubah
   createEffect(async () => {
@@ -41,10 +58,9 @@ export default function KelompokPage() {
   });
 
   const handleKelola = () => {
-    if (data() && data().length > 0) {
-      if (!confirm("Kelompok sudah ada. Membuat kelompok baru akan menghapus kelompok lama. Lanjutkan?")) {
-        return;
-      }
+    if (isLocked()) {
+      toast.error("Kelompok sudah dikunci! Tidak bisa melakukan perubahan.");
+      return;
     }
     setOpen(true);
   };
@@ -66,20 +82,34 @@ export default function KelompokPage() {
     }
   };
 
-  const handleLock = () => {
-    if (!isLocked()) {
-      if (confirm("Setelah dikunci, mahasiswa tidak dapat berpindah kelompok. Lanjutkan?")) {
-        setIsLocked(true);
-        toast.success("Kelompok berhasil dikunci!", {
-          style: { background: '#465EBE', color: 'white' }
-        });
-      }
-    } else {
+  const handleLock = async () => {
+    if (isLocked()) {
       toast.error("Kelompok sudah dikunci!");
+      return;
+    }
+
+    if (!confirm("Setelah dikunci, mahasiswa tidak dapat berpindah kelompok dan dosen tidak dapat melakukan perubahan. Lanjutkan?")) {
+      return;
+    }
+
+    try {
+      await lockTubes(idTubes());
+      await refetchLockStatus();
+      
+      toast.success("Kelompok berhasil dikunci!", {
+        style: { background: '#465EBE', color: 'white' }
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Gagal mengunci kelompok");
     }
   };
 
   const handleDosenAssign = () => {
+    if (isLocked()) {
+      toast.error("Kelompok sudah dikunci! Tidak bisa melakukan assign.");
+      return;
+    }
     navigate(`/kelompok/${idTubes()}/assign`);
   };
 
@@ -93,64 +123,99 @@ export default function KelompokPage() {
     }
   };
 
+  const handleEditKelompok = async (id_kelompok) => {
+    if (isLocked()) {
+      toast.error("Kelompok sudah dikunci! Tidak bisa melakukan edit.");
+      return;
+    }
+    
+    try {
+      const detail = await getKelompokById(id_kelompok);
+      setEditKelompok(detail);
+    } catch (error) {
+      console.error("Error loading detail:", error);
+      toast.error("Gagal memuat detail kelompok");
+    }
+  };
+
+  const handleUpdateMaxAnggota = async (id_kelompok, max_anggota) => {
+    try {
+      await updateMaxAnggota(id_kelompok, max_anggota);
+      await refetch();
+      const updated = await getKelompokById(id_kelompok);
+      setEditKelompok(updated);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleRemoveAnggota = async (npm, id_kelompok) => {
+    try {
+      await removeAnggota(npm, id_kelompok);
+      await refetch();
+      const updated = await getKelompokById(id_kelompok);
+      setEditKelompok(updated);
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return (
     <div class="min-h-screen bg-gray-50 font-sans">
-        
         <Toaster position="top-center" gutter={8} />
-
         <Header />
 
         <main class="max-w-5xl mx-auto px-4 pt-6 pb-20">
             <div class="flex flex-col gap-4 mb-6">
-                <div>
-                   <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Mata Kuliah</h2>
-                   <h1 class="text-2xl font-bold text-[#465EBE]">Pembagian Kelompok Tugas Besar</h1>
-                </div>
+              <div>
+                <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Mata Kuliah</h2>
+                <h1 class="text-2xl font-bold text-[#465EBE]">Pembagian Kelompok Tugas Besar</h1>
+                
+                <Show when={isLocked()}>
+                  <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
+                    Kelompok Terkunci
+                  </div>
+                </Show>
+              </div>
 
+              <Show when={!lockStatusData.loading && !isLocked()}>
                 <div class="flex gap-3">
                     <button 
                         onClick={handleKelola}
                         class="flex-1 bg-[#465EBE] hover:bg-[#3b4fa8] text-white px-4 py-3 rounded-xl shadow-lg shadow-indigo-200 flex justify-center items-center gap-2 transition-all transform active:scale-95 font-medium"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                            <path fill-rule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
-                        </svg>
-                        Kelola Kelompok
-                    </button>
+                    >Kelola Kelompok</button>
 
                     <Show when={data() && data().length > 0}>
                         <button 
                             onClick={handleDosenAssign}
                             class="flex-1 bg-white hover:bg-gray-50 text-[#465EBE] border-2 border-[#465EBE] px-4 py-3 rounded-xl shadow-lg flex justify-center items-center transition-all transform active:scale-95 font-medium"
-                        >
-                            Dosen Assign
-                        </button>
+                        >Dosen Assign</button>
                     </Show>
                 </div>
-            </div>
+              </Show>
+
+              <Show when={lockStatusData.loading}>
+                <div class="text-center py-4 text-gray-400">
+                  <p>Loading...</p>
+                </div>
+              </Show>
+          </div>
 
             <KelompokList 
                 data={detailedData()} 
                 isLocked={isLocked()}
                 onViewDetail={handleViewDetail}
+                onEditKelompok={handleEditKelompok}
             />
 
-            <Show when={data() && data().length > 0}>
-                <div class="mt-6 flex justify-center">
-                    <button 
-                        onClick={handleLock}
-                        class={`px-8 py-3 rounded-xl shadow-lg transition-all transform active:scale-95 font-medium ${
-                            isLocked() 
-                                ? 'bg-gray-400 text-white cursor-not-allowed' 
-                                : 'bg-amber-500 hover:bg-amber-600 text-white'
-                        }`}
-                        disabled={isLocked()}
-                    >
-                        {isLocked() ? 'Locked' : 'Lock'}
-                    </button>
-                </div>
-            </Show>
-
+            <Show when={data() && data().length > 0 && !lockStatusData.loading && !isLocked()}>
+              <div class="mt-6 flex justify-center">
+                  <button 
+                      onClick={handleLock}
+                      class="px-8 py-3 rounded-xl shadow-lg transition-all transform active:scale-95 font-medium bg-amber-500 hover:bg-amber-600 text-white"
+                  >Lock</button>
+              </div>
+          </Show>
             <Show when={selectedKelompok()}>
                 <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setSelectedKelompok(null)}>
                     <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6" onClick={(e) => e.stopPropagation()}>
@@ -186,6 +251,14 @@ export default function KelompokPage() {
                     </div>
                 </div>
             </Show>
+
+            <EditKelompokModal
+                open={!!editKelompok()}
+                kelompok={editKelompok()}
+                onClose={() => setEditKelompok(null)}
+                onUpdateMaxAnggota={handleUpdateMaxAnggota}
+                onRemoveAnggota={handleRemoveAnggota}
+            />
         </main>
 
         <Show when={open()}>

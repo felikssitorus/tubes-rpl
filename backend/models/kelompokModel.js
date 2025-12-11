@@ -40,17 +40,16 @@ const getById = async (id) => {
 // GET kelompok by id_tubes
 const getByIdTubes = async (id_tubes) => {
   const result = await pool.query(`
-    SELECT k.id_kelompok, k.id_tubes, k.nama_kelompok, COUNT(ak.npm) as jumlah_anggota
+    SELECT k.id_kelompok, k.id_tubes, k.nama_kelompok, k.max_anggota, COUNT(ak.npm) as jumlah_anggota
     FROM kelompok k
     LEFT JOIN anggota_kelompok ak ON k.id_kelompok = ak.id_kelompok
     WHERE k.id_tubes = $1
-    GROUP BY k.id_kelompok, k.id_tubes, k.nama_kelompok
+    GROUP BY k.id_kelompok, k.id_tubes, k.nama_kelompok, k.max_anggota
     ORDER BY k.nama_kelompok ASC
   `, [id_tubes]);
   return result.rows;
 };
 
-// CREATE multiple kelompok sekaligus (generate kelompok)
 const generateKelompok = async (data) => {
   const { id_tubes, jumlah_kelompok, jumlah_anggota_per_kelompok } = data;
   
@@ -60,13 +59,30 @@ const generateKelompok = async (data) => {
   try {
     await client.query('BEGIN');
     
+    const lastKelompokResult = await client.query(
+      `SELECT nama_kelompok FROM kelompok 
+       WHERE id_tubes = $1 
+       ORDER BY nama_kelompok DESC 
+       LIMIT 1`,
+      [id_tubes]
+    );
+    
+    let startIndex = 1;
+    if (lastKelompokResult.rows.length > 0) {
+      const lastNama = lastKelompokResult.rows[0].nama_kelompok;
+      const lastChar = lastNama.match(/([A-Z])$/)?.[1];
+      if (lastChar) {
+        startIndex = lastChar.charCodeAt(0) - 64 + 1;
+      }
+    }
+    
     // Generate kelompok baru
-    for (let i = 1; i <= jumlah_kelompok; i++) {
-      const namaKelompok = `Kelompok ${String.fromCharCode(64 + i)}`; // A, B, C, ...
+    for (let i = 0; i < jumlah_kelompok; i++) {
+      const namaKelompok = `Kelompok ${String.fromCharCode(64 + startIndex + i)}`; 
       
       const result = await client.query(
-        'INSERT INTO kelompok (id_tubes, nama_kelompok, max_anggota) VALUES ($1, $2, $3) RETURNING *', // ← Tambah max_anggota
-        [id_tubes, namaKelompok, jumlah_anggota_per_kelompok] // ← Tambah parameter ketiga
+        'INSERT INTO kelompok (id_tubes, nama_kelompok, max_anggota) VALUES ($1, $2, $3) RETURNING *',
+        [id_tubes, namaKelompok, jumlah_anggota_per_kelompok] 
       );
       
       createdKelompok.push({
@@ -102,18 +118,6 @@ const update = async (id_kelompok, data) => {
     [data.id_tubes, data.nama_kelompok, id_kelompok]
   );
   return result.rows[0];
-};
-
-// DELETE kelompok
-const remove = async (id_kelompok) => {
-  await pool.query("DELETE FROM kelompok WHERE id_kelompok = $1", [id_kelompok]);
-  return true;
-};
-
-// DELETE all kelompok by id_tubes
-const removeByIdTubes = async (id_tubes) => {
-  await pool.query("DELETE FROM kelompok WHERE id_tubes = $1", [id_tubes]);
-  return true;
 };
 
 // ADD anggota ke kelompok
@@ -230,6 +234,38 @@ const assignMahasiswa = async (assignments) => {
   }
 };
 
+// UPDATE max_anggota kelompok
+const updateMaxAnggota = async (id_kelompok, max_anggota) => {
+  const result = await pool.query(
+    "UPDATE kelompok SET max_anggota = $1 WHERE id_kelompok = $2 RETURNING *", [max_anggota, id_kelompok]
+  );
+  return result.rows[0];
+};
+
+// GET lock status by id_tubes
+const getLockStatus = async (id_tubes) => {
+  const result = await pool.query(
+    "SELECT is_locked FROM tugas_besar WHERE id_tubes = $1", [id_tubes]
+  );
+  return result.rows[0];
+};
+
+// LOCK tubes
+const lockTubes = async (id_tubes) => {
+  const result = await pool.query(
+    "UPDATE tugas_besar SET is_locked = TRUE WHERE id_tubes = $1 RETURNING *", [id_tubes]
+  );
+  return result.rows[0];
+};
+
+// UNLOCK tubes
+const unlockTubes = async (id_tubes) => {
+  const result = await pool.query(
+    "UPDATE tugas_besar SET is_locked = FALSE WHERE id_tubes = $1 RETURNING *", [id_tubes]
+  );
+  return result.rows[0];
+};
+
 module.exports = {
   getAll,
   getById,
@@ -237,12 +273,14 @@ module.exports = {
   generateKelompok,
   create,
   update,
-  remove,
-  removeByIdTubes,
+  updateMaxAnggota,
   addAnggota,
   removeAnggota,
   getMahasiswaByKelas,
   getMahasiswaAvailable,
   getMahasiswaInKelompok,
-  assignMahasiswa
+  assignMahasiswa,
+  getLockStatus,    
+  lockTubes,      
+  unlockTubes       
 };

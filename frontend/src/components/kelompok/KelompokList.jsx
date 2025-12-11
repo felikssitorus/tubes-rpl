@@ -2,16 +2,23 @@ import { For, Show } from "solid-js";
 
 export default function KelompokList(props) {
   const kelompok = () => props.data || [];
+  const isLocked = () => props.isLocked || false;
 
   return (
     <div class="space-y-4 mt-5">
       <For each={kelompok()}>
         {(item) => (
           <div class="border rounded-lg p-6 bg-white">
-            <div class="mb-4">
+            <div class="mb-4 flex items-center justify-between">
               <h3 class="text-lg font-semibold text-gray-800">
-                {item.nama_kelompok} ({item.anggota?.length || 0} Orang)
+                {item.nama_kelompok} ({item.anggota?.length || 0} / {item.max_anggota || 4} Orang)
               </h3>
+              <Show when={!isLocked()}>
+                <button
+                  onClick={() => props.onEditKelompok(item.id_kelompok)}
+                  class="px-3 py-1.5 text-sm bg-[#465EBE] text-white rounded-lg hover:bg-[#3b4fa8] transition-colors"
+                > Edit</button>
+              </Show>
             </div>
 
             <Show when={item.anggota && item.anggota.length > 0}>
@@ -31,17 +38,12 @@ export default function KelompokList(props) {
             </Show>
 
             <Show when={!item.anggota || item.anggota.length === 0}>
-              <p class="text-sm text-gray-400 italic pt-2 border-t">Belum ada anggota</p>
+              <p class="text-sm text-gray-400 pt-2 border-t">Belum ada anggota</p>
             </Show>
           </div>
         )}
       </For>
 
-      <Show when={kelompok().length === 0}>
-        <div class="text-center py-12 text-gray-400">
-          <p>Belum ada kelompok. Klik "Kelola Kelompok" untuk membuat kelompok.</p>
-        </div>
-      </Show>
     </div>
   );
 }
