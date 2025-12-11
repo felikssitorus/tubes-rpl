@@ -5,6 +5,7 @@ export default function KomponenModal(props) {
 
   const [nama, setNama] = createSignal("");
   const [bobot, setBobot] = createSignal("");
+  const [catatan, setCatatan] = createSignal("");
 
   createEffect(() => {
     if (props.open) {
@@ -12,11 +13,13 @@ export default function KomponenModal(props) {
       if (props.data) {
         setNama(props.data.nama_komponen || ""); 
         setBobot(props.data.bobot_komponen || "");
+        setCatatan(props.data.catatan || "");
 
       //mode tambah
       } else {
         setNama("");
         setBobot("");
+        setCatatan("");
       }
     }
   });
@@ -26,6 +29,7 @@ export default function KomponenModal(props) {
     onSave({
       nama_komponen: nama(),
       bobot_komponen: Number(bobot()),
+      catatan: catatan(),
       id_tubes: 1 
     });
   };
@@ -50,7 +54,7 @@ export default function KomponenModal(props) {
           />
         </div>
 
-        <div class="mb-6">
+        <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Bobot (%)</label>
           <input
             class="border border-gray-300 p-2.5 w-full rounded-lg focus:ring-2 focus:ring-[#465EBE] focus:border-[#465EBE] outline-none"
@@ -58,6 +62,17 @@ export default function KomponenModal(props) {
             value={bobot()}
             onInput={(e) => setBobot(e.target.value)}
             placeholder="0 - 100"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Catatan (Opsional)</label>
+          <textarea
+            class="border border-gray-300 p-2.5 w-full rounded-lg focus:ring-2 focus:ring-[#465EBE] focus:border-[#465EBE] outline-none resize-none"
+            rows="3"
+            value={catatan()}
+            onInput={(e) => setCatatan(e.target.value)}
+            placeholder="Tambahkan catatan jika perlu..."
           />
         </div>
 
