@@ -1,140 +1,60 @@
-// File: backend/controllers/kelompokController.js
-const pool = require("../config/db");
+import db from '../db.js'; // koneksi database
 
-// ======================================================
-// GET kelompok berdasarkan ID_TUBES
-// ======================================================
-exports.fetchKelompokByTubes = async (req, res) => {
-  try {
-    const { idTubes } = req.params;
-
-    // Ambil semua kelompok untuk tubes ini walaupun belum ada anggota
-    const query = `
-      SELECT k.id_kelompok, k.nama_kelompok, m.nama
-      FROM kelompok k
-      LEFT JOIN anggota_kelompok ak ON k.id_kelompok = ak.id_kelompok
-      LEFT JOIN mahasiswa m ON ak.npm = m.npm
-      WHERE k.id_tubes = $1
-      ORDER BY k.id_kelompok, m.nama
-    `;
-
-    const { rows } = await pool.query(query, [idTubes]);
-
-    // Siapkan struktur kelompok 1-4 jika kosong
-    const kelompokMap = {};
-    const defaultKelompok = ["Kelompok 1", "Kelompok 2", "Kelompok 3", "Kelompok 4"];
-
-    defaultKelompok.forEach(name => {
-      kelompokMap[name] = [];
-    });
-
-    rows.forEach(row => {
-      if (row.nama_kelompok) {
-        if (!kelompokMap[row.nama_kelompok]) {
-          kelompokMap[row.nama_kelompok] = [];
-        }
-        if (row.nama) {
-          kelompokMap[row.nama_kelompok].push({ nama: row.nama });
-        }
-      }
-    });
-
-    res.json(kelompokMap);
-
-  } catch (err) {
-    console.error("Error fetchKelompokByTubes:", err);
-    res.status(500).json({ message: "Gagal mengambil kelompok berdasarkan tubes" });
-  }
+export const getTubesByMk = async (idMkDibuka) => {
+  const query = `
+    SELECT id_tubes, topik_tubes, is_locked
+    FROM tugas_besar
+    WHERE id_mk_dibuka = $1
+    ORDER BY id_tubes
+  `;
+  const result = await db.query(query, [idMkDibuka]);
+  return result.rows;
 };
 
-
-// GET kelompok mahasiswa
-exports.fetchKelompokMahasiswa = async (req, res) => {
-  try {
-    const { idTubes, npm } = req.params;
-
-    const query = `
-      SELECT k.id_kelompok, k.nama_kelompok
-      FROM anggota_kelompok ak
-      JOIN kelompok k ON ak.id_kelompok = k.id_kelompok
-      WHERE ak.npm = $1 AND k.id_tubes = $2
-    `;
-    const { rows } = await pool.query(query, [npm, idTubes]);
-
-    if (rows.length === 0) {
-      return res.json({ message: "Belum masuk kelompok", anggota: [] });
-    }
-
-    const idKelompok = rows[0].id_kelompok;
-    const anggotaQuery = `
-      SELECT m.nama
-      FROM anggota_kelompok ak
-      JOIN mahasiswa m ON ak.npm = m.npm
-      WHERE ak.id_kelompok = $1
-      ORDER BY m.nama
-    `;
-    const anggota = await pool.query(anggotaQuery, [idKelompok]);
-
-    res.json({
-      nama_kelompok: rows[0].nama_kelompok,
-      anggota: anggota.rows
-    });
-  } catch (err) {
-    console.error("Error fetchKelompokMahasiswa:", err);
-    res.status(500).json({ message: "Gagal load kelompok mahasiswa" });
-  }
+export const getKelompokByTubes = async (idTubes) => {
+  const query = `
+    SELECT k.nama_kelompok, array_agg(a.npm) AS anggota_npm
+    FROM kelompok k
+    LEFT JOIN anggota_kelompok a ON k.id_kelompok = a.id_kelompok
+    WHERE k.id_tubes = $1
+    GROUP BY k.nama_kelompok
+  `;
+  const result = await db.query(query, [idTubes]);
+  const kelompok = {};
+  result.rows.forEach(row => {
+    kelompok[row.nama_kelompok] = row.anggota_npm.filter(Boolean);
+  });
+  return kelompok;
 };
 
-// POST join kelompok
-exports.postJoinKelompok = async (req, res) => {
-  try {
-    const { idTubes, namaKelompok, npm } = req.body;
+export const getMyKelompok = async (idTubes, npm) => {
+  const query = `
+    SELECT k.nama_kelompok, array_agg(a2.npm) AS anggota_npm
+    FROM kelompok k
+    JOIN anggota_kelompok a ON k.id_kelompok = a.id_kelompok
+    LEFT JOIN anggota_kelompok a2 ON k.id_kelompok = a2.id_kelompok
+    WHERE k.id_tubes = $1 AND a.npm = $2
+    GROUP BY k.nama_kelompok
+  `;
+  const result = await db.query(query, [idTubes, npm]);
+  if (result.rows.length === 0) return null;
+  const row = result.rows[0];
+  return { nama_kelompok: row.nama_kelompok, anggota: row.anggota_npm.filter(Boolean) };
+};
 
-    if (!idTubes || !namaKelompok || !npm) {
-      return res.status(400).json({
-        message: "idTubes, namaKelompok, dan npm wajib diisi"
-      });
-    }
+export const joinKelompok = async (idTubes, namaKelompok, npm) => {
+  // ambil id_kelompok
+  const idKelQuery = `SELECT id_kelompok FROM kelompok WHERE id_tubes = $1 AND nama_kelompok = $2`;
+  const { rows } = await db.query(idKelQuery, [idTubes, namaKelompok]);
+  if (!rows[0]) throw new Error("Kelompok tidak ditemukan");
+  const idKelompok = rows[0].id_kelompok;
 
-    const getKelQuery = `
-      SELECT id_kelompok
-      FROM kelompok
-      WHERE id_tubes = $1 AND nama_kelompok = $2
-    `;
-    const foundKel = await pool.query(getKelQuery, [idTubes, namaKelompok]);
-    if (foundKel.rows.length === 0) return res.status(400).json({ message: "Kelompok tidak ditemukan" });
-
-    const idKelompok = foundKel.rows[0].id_kelompok;
-
-    // hapus anggota lama
-    await pool.query(
-      `DELETE FROM anggota_kelompok 
-       WHERE npm = $1 AND id_kelompok IN (
-          SELECT id_kelompok FROM kelompok WHERE id_tubes = $2
-       )`,
-      [npm, idTubes]
-    );
-
-    await pool.query(
-      `INSERT INTO anggota_kelompok (npm, id_kelompok) VALUES ($1, $2)`,
-      [npm, idKelompok]
-    );
-
-    const anggotaQuery = `
-      SELECT m.nama
-      FROM anggota_kelompok ak
-      JOIN mahasiswa m ON ak.npm = m.npm
-      WHERE ak.id_kelompok = $1
-      ORDER BY m.nama
-    `;
-    const anggota = await pool.query(anggotaQuery, [idKelompok]);
-
-    res.json({
-      message: `Berhasil masuk ke ${namaKelompok}`,
-      anggota: anggota.rows
-    });
-  } catch (err) {
-    console.error("Error postJoinKelompok:", err);
-    res.status(500).json({ message: "Gagal join kelompok" });
-  }
+  // insert anggota
+  const insertQuery = `
+    INSERT INTO anggota_kelompok (npm, id_kelompok)
+    VALUES ($1, $2)
+    ON CONFLICT (npm, id_kelompok) DO NOTHING
+  `;
+  await db.query(insertQuery, [npm, idKelompok]);
+  return { message: `Berhasil join ke ${namaKelompok}` };
 };
