@@ -20,8 +20,9 @@ export default function LoginForm() {
       localStorage.setItem("user", JSON.stringify({
         name: response.user.name,
         email: response.user.email,
-        npm: response.user.npm  // <- pastikan ini ada
+        npm: response.user.npm.trim() // hapus spasi
       }));
+
       toast.success(`Selamat datang, ${response.user.name}`);
 
       // redirect ke dashboard

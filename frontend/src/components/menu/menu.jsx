@@ -1,27 +1,35 @@
 import { For } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 
-const Menu = (props) => {
-  const { courseInfo } = props;
+const Menu = ({ courseInfo }) => {
   const navigate = useNavigate();
 
   const handleClick = (menu) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const npm = user?.npm?.trim(); // <-- TRIM
+    const idMk = courseInfo?.idMkDibuka;
+
+    if (!npm || !idMk) {
+      console.error("npm atau idMk tidak valid");
+      return;
+    }
+
     switch (menu.page) {
       case "pembagian-kelompok":
-        navigate(`/kelompok/${courseInfo.idMkDibuka}`);
+        navigate(`/kelompok/${idMk}`);
         break;
       case "nilai":
-        navigate(`/nilai/${courseInfo.idMkDibuka}`);
+        navigate(`/nilai/${encodeURIComponent(npm)}/${idMk}`);
         break;
       default:
-        console.warn(`Halaman ${menu.page} belum di-handle`);
+        console.warn(`Halaman "${menu.page}" belum di-handle`);
         break;
     }
   };
 
+
   return (
     <div class="container p-6 w-full text-left">
-
       <div class="course-title text-lg font-bold mb-4">
         MATA KULIAH: {courseInfo.courseCode}
         <div class="course-info max-w-md mt-2 p-3 rounded shadow bg-white">
@@ -32,7 +40,6 @@ const Menu = (props) => {
         </div>
       </div>
 
-      {/* Buttons smaller width with hover shadow */}
       <div class="menu-list w-full flex flex-col gap-4 mt-6">
         <For each={courseInfo.menus}>
           {(menu) => (
@@ -51,7 +58,6 @@ const Menu = (props) => {
           )}
         </For>
       </div>
-
     </div>
   );
 };

@@ -1,21 +1,23 @@
+import { createSignal, onMount, For, Show } from "solid-js";
+import { useParams } from "@solidjs/router";
+import axios from "axios";
 import Header from "../../components/layout/Header";
 import Nilai from "../../components/nilai/nilai";
-import { useParams } from "@solidjs/router";
-import { createSignal, onMount, For, Show } from "solid-js";
-import axios from "axios";
 
 export default function NilaiPage() {
   const { npm, idMk } = useParams();
   const [tubesList, setTubesList] = createSignal([]);
   const [selectedTubes, setSelectedTubes] = createSignal("");
 
-  // Load daftar tubes
   onMount(async () => {
-    if (!npm) return;
+    if (!npm || !idMk) return console.error("npm atau idMk tidak valid");
+
     try {
-      const res = await axios.get(`http://localhost:5000/nilai-mhs/tubes/${npm}`, {
-        params: { idMk }
-      });
+      const res = await axios.get(
+        `http://localhost:5000/nilai-mhs/tubes/${encodeURIComponent(
+          npm.trim()
+        )}?idMk=${idMk}`
+      );
       setTubesList(res.data || []);
     } catch (err) {
       console.error("Gagal load tubes:", err);
@@ -33,17 +35,21 @@ export default function NilaiPage() {
           value={selectedTubes()}
           onChange={(e) => setSelectedTubes(e.target.value)}
         >
-          <option value="" disabled>Pilih Tugas Besar</option>
+          <option value="" disabled>
+            Pilih Tugas Besar
+          </option>
           <For each={tubesList()}>
-            {(tb) => <option value={tb.id_tubes}>{tb.topik_tubes}</option>}
+            {(tb) => (
+              <option value={tb.id_tubes}>{tb.topik_tubes}</option>
+            )}
           </For>
         </select>
       </div>
 
-      {/* Nilai */}
-      <div class="flex-1 flex items-center justify-center">
+      {/* Nilai Container */}
+      <div class="flex-1 flex items-center justify-center mt-4">
         <Show when={selectedTubes()}>
-          <div class="flex flex-col items-center justify-center">
+          <div class="flex flex-col items-center">
             <h1 class="text-3xl font-bold mb-6 text-[#071755] text-center">
               Detail Nilai
             </h1>

@@ -3,6 +3,7 @@ import LoginPage from "./pages/login/loginPage.jsx";
 import DashboardPage from "./pages/dashboard/dashboardPage.jsx";
 import MenuPage from "./pages/menu/menuPage.jsx";
 import KelompokPage from "./pages/kelompok/kelompokPage.jsx";
+import NilaiPage from "./pages/nilai/nilaiPage.jsx";
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/menu/:courseCode" component={MenuPage} />
       <Route path="/kelompok/:courseId" component={KelompokPage} />
+      <Route path="/nilai/:npm/:idMk" component={NilaiPage} />
     </Router>
   );
 }

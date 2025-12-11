@@ -28,6 +28,9 @@ app.use("/kelompok", kelompokRoutes);
 const mahasiswaRoutes = require("./routes/mahasiswaRoutes");
 app.use("/mahasiswa", mahasiswaRoutes);  // <- endpoint: /mahasiswa atau /mahasiswa/:email
 
+// Tambahkan routes nilai mahasiswa
+const nilaiMhsRoutes = require("./routes/nilaiRoutes");
+app.use("/nilai-mhs", nilaiMhsRoutes); // endpoint: /nilai-mhs/:npm
 // Tambahkan routes tubes
 const tubesRoutes = require("./routes/tubesRoutes");
 app.use("/tubes", tubesRoutes);
