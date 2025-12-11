@@ -1,8 +1,7 @@
 import { For } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 
-const Menu = (props) => {
-  const { courseInfo } = props;
+const Menu = ({ courseInfo }) => {
   const navigate = useNavigate();
 
   const handleClick = (menu) => {
@@ -11,7 +10,12 @@ const Menu = (props) => {
         navigate(`/kelompok/${courseInfo.idMkDibuka}`);
         break;
       case "nilai":
-        navigate(`/nilai/${courseInfo.idMkDibuka}`);
+        const user = JSON.parse(localStorage.getItem("user")); // ambil object user
+        if (user && user.npm) {
+          navigate(`/nilai/${user.npm}`);
+        } else {
+          console.error("NPM user tidak ditemukan di localStorage");
+        }
         break;
       default:
         console.warn(`Halaman ${menu.page} belum di-handle`);
@@ -21,7 +25,6 @@ const Menu = (props) => {
 
   return (
     <div class="container p-6 w-full text-left">
-
       <div class="course-title text-lg font-bold mb-4">
         MATA KULIAH: {courseInfo.courseCode}
         <div class="course-info max-w-md mt-2 p-3 rounded shadow bg-white">
@@ -32,7 +35,6 @@ const Menu = (props) => {
         </div>
       </div>
 
-      {/* Buttons smaller width with hover shadow */}
       <div class="menu-list w-full flex flex-col gap-4 mt-6">
         <For each={courseInfo.menus}>
           {(menu) => (
@@ -51,7 +53,6 @@ const Menu = (props) => {
           )}
         </For>
       </div>
-
     </div>
   );
 };

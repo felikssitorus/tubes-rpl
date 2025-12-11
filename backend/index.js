@@ -32,6 +32,10 @@ app.use("/mahasiswa", mahasiswaRoutes);  // <- endpoint: /mahasiswa atau /mahasi
 const tubesRoutes = require("./routes/tubesRoutes");
 app.use("/tubes", tubesRoutes);
 
+// Tambahkan routes nilai mahasiswa
+const nilaiMhsRoutes = require("./routes/nilaiRoutes");
+app.use("/nilai-mhs", nilaiMhsRoutes); // endpoint: /nilai-mhs/:npm
+
 // Jalankan server
 const PORT = 5000;
 app.listen(PORT, () => {
