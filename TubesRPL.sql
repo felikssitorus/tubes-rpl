@@ -73,7 +73,7 @@ CREATE TABLE tugas_besar (
     id_mk_dibuka INT REFERENCES mata_kuliah_dibuka(id_mk_dibuka),
     topik_tubes VARCHAR(100)
 );
-
+ALTER TABLE tugas_besar ADD COLUMN IF NOT EXISTS is_locked BOOLEAN DEFAULT FALSE;
 -- KELOMPOK
 CREATE TABLE kelompok (
     id_kelompok SERIAL PRIMARY KEY,
@@ -97,8 +97,8 @@ CREATE TABLE komponen (
     nama_komponen VARCHAR(50),
     bobot_komponen INT CHECK (bobot_komponen > 0 AND bobot_komponen <= 100)
 );
-ALTER TABLE komponen
-ADD COLUMN catatan
+ALTER TABLE komponen 
+ADD COLUMN catatan TEXT;
 
 -- NILAI
 CREATE TABLE nilai (
@@ -326,6 +326,7 @@ INSERT INTO tugas_besar (id_mk_dibuka, topik_tubes) VALUES
 (6,'Aplikasi Manajemen Acara'),
 (7,'Analisis Data Penjualan'),
 (8,'Sistem Manajemen Data Kesehatan');
+
 
 
 
