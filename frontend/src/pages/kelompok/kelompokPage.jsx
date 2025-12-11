@@ -6,7 +6,7 @@ export default function KelompokPage() {
   const params = useParams();
   const idMkDibuka = params.courseId;
 
-  // AMBIL DATA LOGIN DARI LOCAL STORAGE
+  // Ambil data login dari localStorage
   const user = JSON.parse(localStorage.getItem("user"));
 
   return (

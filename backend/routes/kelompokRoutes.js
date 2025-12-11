@@ -1,18 +1,21 @@
-// File: backend/routes/kelompokRoutes.js
 const express = require("express");
 const {
   fetchKelompokByTubes,
   fetchKelompokMahasiswa,
-  postJoinKelompok
+  postJoinKelompok,
+  fetchTubesByMk
 } = require("../controllers/kelompokController");
 
 const router = express.Router();
 
-// route untuk semua topik tubes
+// Tambahkan prefix /tubes agar sesuai frontend
 router.get("/tubes/:idTubes", fetchKelompokByTubes);
 router.get("/tubes/:idTubes/mahasiswa/:npm", fetchKelompokMahasiswa);
 
-// join kelompok
+// Join kelompok
 router.post("/join", postJoinKelompok);
+
+// Ambil topik tubes berdasarkan MK
+router.get("/mk/:idMkDibuka", fetchTubesByMk);
 
 module.exports = router;
