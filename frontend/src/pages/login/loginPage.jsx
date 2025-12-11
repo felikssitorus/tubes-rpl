@@ -1,56 +1,9 @@
-import Header from "../../components/layout/Header";
-import Nilai from "../../components/nilai/nilai";
-import { useParams } from "@solidjs/router";
-import { createSignal, onMount, For, Show } from "solid-js";
-import axios from "axios";
+import LoginForm from "../../components/login/loginForm";
 
-export default function NilaiPage() {
-  const { npm, idMk } = useParams();
-  const [tubesList, setTubesList] = createSignal([]);
-  const [selectedTubes, setSelectedTubes] = createSignal("");
-
-  // Load daftar tubes
-  onMount(async () => {
-    if (!npm) return;
-    try {
-      const res = await axios.get(`http://localhost:5000/nilai-mhs/tubes/${npm}`, {
-        params: { idMk }
-      });
-      setTubesList(res.data || []);
-    } catch (err) {
-      console.error("Gagal load tubes:", err);
-    }
-  });
-
+export default function LoginPage() {
   return (
-    <div class="flex flex-col min-h-screen bg-gray-100">
-      <Header />
-
-      {/* Dropdown Tugas Besar */}
-      <div class="p-4">
-        <select
-          class="w-80 p-2 border border-black rounded"
-          value={selectedTubes()}
-          onChange={(e) => setSelectedTubes(e.target.value)}
-        >
-          <option value="" disabled>Pilih Tugas Besar</option>
-          <For each={tubesList()}>
-            {(tb) => <option value={tb.id_tubes}>{tb.topik_tubes}</option>}
-          </For>
-        </select>
-      </div>
-
-      {/* Nilai */}
-      <div class="flex-1 flex items-center justify-center">
-        <Show when={selectedTubes()}>
-          <div class="flex flex-col items-center justify-center">
-            <h1 class="text-3xl font-bold mb-6 text-[#071755] text-center">
-              Detail Nilai
-            </h1>
-            <Nilai npm={npm} idTubes={selectedTubes()} />
-          </div>
-        </Show>
-      </div>
+    <div class="min-h-screen flex justify-center items-center bg-gradient-to-b from-[#081B4A] to-[#0757ED]">
+      <LoginForm />
     </div>
   );
 }
