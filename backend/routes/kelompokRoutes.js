@@ -1,21 +1,17 @@
 const express = require("express");
 const {
+  getTubesByMk,
   fetchKelompokByTubes,
   fetchKelompokMahasiswa,
-  postJoinKelompok,
-  fetchTubesByMk
+  postJoinKelompok
 } = require("../controllers/kelompokController");
 
 const router = express.Router();
 
-// Tambahkan prefix /tubes agar sesuai frontend
+// Semua route langsung memanggil controller
+router.get("/mk/:idMkDibuka", getTubesByMk);
 router.get("/tubes/:idTubes", fetchKelompokByTubes);
 router.get("/tubes/:idTubes/mahasiswa/:npm", fetchKelompokMahasiswa);
-
-// Join kelompok
 router.post("/join", postJoinKelompok);
-
-// Ambil topik tubes berdasarkan MK
-router.get("/mk/:idMkDibuka", fetchTubesByMk);
 
 module.exports = router;
