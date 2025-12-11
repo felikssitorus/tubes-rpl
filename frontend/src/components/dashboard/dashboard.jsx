@@ -31,7 +31,7 @@ const Dashboard = (props) => {
         <For each={mataKuliah}>
           {(mk) => (
             <p>
-              {mk.nama_mata_kuliah} - Semester {mk.semester}, {mk.tahun}, Kelas {mk.kelas}
+              - Semester {mk.semester}, {mk.tahun}, Kelas {mk.kelas}
             </p>
           )}
         </For>
