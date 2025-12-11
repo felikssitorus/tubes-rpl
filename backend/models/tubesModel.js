@@ -3,12 +3,7 @@ const pool = require("../config/db");
 // GET all tugas besar
 const getAll = async () => {
   const result = await pool.query(`
-    SELECT 
-      tb.*,
-      mk.nama_mata_kuliah,
-      mkd.semester,
-      mkd.tahun,
-      mkd.kelas
+    SELECT tb.*, mk.nama_mata_kuliah, mkd.semester, mkd.tahun, mkd.kelas
     FROM tugas_besar tb
     JOIN mata_kuliah_dibuka mkd ON tb.id_mk_dibuka = mkd.id_mk_dibuka
     JOIN mata_kuliah mk ON mkd.id_mata_kuliah = mk.id_mata_kuliah
@@ -20,12 +15,7 @@ const getAll = async () => {
 // GET tugas besar by ID
 const getById = async (id) => {
   const result = await pool.query(`
-    SELECT 
-      tb.*,
-      mk.nama_mata_kuliah,
-      mkd.semester,
-      mkd.tahun,
-      mkd.kelas
+    SELECT tb.*, mk.nama_mata_kuliah, mkd.semester, mkd.tahun, mkd.kelas
     FROM tugas_besar tb
     JOIN mata_kuliah_dibuka mkd ON tb.id_mk_dibuka = mkd.id_mk_dibuka
     JOIN mata_kuliah mk ON mkd.id_mata_kuliah = mk.id_mata_kuliah
