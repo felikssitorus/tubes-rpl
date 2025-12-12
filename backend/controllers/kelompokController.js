@@ -1,92 +1,113 @@
-const Kelompok = require("../models/kelompokModel");
+const db = require('../config/db');
 
-exports.getAllKelompok = async (req, res) => {
-  const data = await Kelompok.getAll();
-  res.json(data);
-};
-
-exports.getKelompok = async (req, res) => {
-  const data = await Kelompok.getById(req.params.id_kelompok);
-  if (!data) {
-    return res.status(404).json({ error: "Kelompok not found" });
+// GET daftar topik tugas besar per MK
+const getTubesByMk = async (req, res) => {
+  try {
+    const idMkDibuka = req.params.idMkDibuka;
+    const query = `
+      SELECT id_tubes, topik_tubes, is_locked
+      FROM tugas_besar
+      WHERE id_mk_dibuka = $1
+      ORDER BY id_tubes
+    `;
+    const result = await db.query(query, [idMkDibuka]);
+    res.json({ tubes: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  res.json(data);
 };
 
-exports.getKelompokByTubes = async (req, res) => {
-  const data = await Kelompok.getByIdTubes(req.params.id_tubes);
-  res.json(data);
+// GET kelompok per tubes
+const fetchKelompokByTubes = async (req, res) => {
+  try {
+    const idTubes = req.params.idTubes;
+    const query = `
+      SELECT k.nama_kelompok, array_agg(m.nama) AS anggota
+      FROM kelompok k
+      LEFT JOIN anggota_kelompok ak ON k.id_kelompok = ak.id_kelompok
+      LEFT JOIN mahasiswa m ON ak.npm = m.npm
+      WHERE k.id_tubes = $1
+      GROUP BY k.nama_kelompok
+    `;
+    const result = await db.query(query, [idTubes]);
+    const kelompok = {};
+    result.rows.forEach(row => {
+      kelompok[row.nama_kelompok] = row.anggota.filter(Boolean);
+    });
+
+    // Ambil status is_locked dari tabel tugas_besar
+    const lockQuery = `SELECT is_locked FROM tugas_besar WHERE id_tubes = $1`;
+    const lockRes = await db.query(lockQuery, [idTubes]);
+    const tubes_locked = lockRes.rows[0]?.is_locked || false;
+
+    res.json({ kelompok, tubes_locked });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
-exports.generateKelompok = async (req, res) => {
-  const data = await Kelompok.generateKelompok(req.body);
-  res.json({ message: "Kelompok berhasil dibuat", data });
+// GET kelompok mahasiswa per tubes
+const fetchKelompokMahasiswa = async (req, res) => {
+  try {
+    const { idTubes, npm } = req.params;
+    const query = `
+      SELECT k.nama_kelompok, array_agg(m.nama) AS anggota
+      FROM kelompok k
+      JOIN anggota_kelompok ak ON k.id_kelompok = ak.id_kelompok
+      LEFT JOIN mahasiswa m ON ak.npm = m.npm
+      WHERE k.id_tubes = $1 AND ak.npm = $2
+      GROUP BY k.nama_kelompok
+    `;
+    const result = await db.query(query, [idTubes, npm]);
+    if (result.rows.length === 0) return res.json(null);
+    const row = result.rows[0];
+    res.json({ nama_kelompok: row.nama_kelompok, anggota: row.anggota, is_locked: false });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
-exports.createKelompok = async (req, res) => {
-  const data = await Kelompok.create(req.body);
-  res.json({ message: "Kelompok created", data });
+// POST join kelompok
+const postJoinKelompok = async (req, res) => {
+  try {
+    const { idTubes, namaKelompok, npm } = req.body;
+
+    // ambil id_kelompok
+    const idKelQuery = `SELECT id_kelompok FROM kelompok WHERE id_tubes = $1 AND nama_kelompok = $2`;
+    const { rows } = await db.query(idKelQuery, [idTubes, namaKelompok]);
+    if (!rows[0]) return res.status(404).json({ error: "Kelompok tidak ditemukan" });
+    const idKelompok = rows[0].id_kelompok;
+
+    // cek apakah tubes sudah dikunci
+    const lockQuery = `SELECT is_locked FROM tugas_besar WHERE id_tubes = $1`;
+    const lockRes = await db.query(lockQuery, [idTubes]);
+    if (lockRes.rows[0]?.is_locked) {
+      return res.status(403).json({ error: "Tugas besar sudah dikunci, tidak bisa join kelompok" });
+    }
+
+    // insert anggota
+    const insertQuery = `
+      INSERT INTO anggota_kelompok (npm, id_kelompok)
+      VALUES ($1, $2)
+      ON CONFLICT (npm, id_kelompok) DO NOTHING
+    `;
+    await db.query(insertQuery, [npm, idKelompok]);
+    res.json({ message: `Berhasil join ke ${namaKelompok}` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
-exports.updateKelompok = async (req, res) => {
-  const data = await Kelompok.update(req.params.id_kelompok, req.body);
-  res.json({ message: "Kelompok updated", data });
+module.exports = {
+  getTubesByMk,
+  fetchKelompokByTubes,
+  fetchKelompokMahasiswa,
+  postJoinKelompok
 };
 
-exports.addAnggota = async (req, res) => {
-  const data = await Kelompok.addAnggota(req.body);
-  res.json({ message: "Anggota berhasil ditambahkan", data });
-};
-
-exports.removeAnggota = async (req, res) => {
-  const { npm, id_kelompok } = req.params;
-  await Kelompok.removeAnggota(npm, id_kelompok);
-  res.json({ message: "Anggota removed" });
-};
-
-exports.getMahasiswaByKelas = async (req, res) => {
-  const data = await Kelompok.getMahasiswaByKelas(req.params.kelas);
-  res.json(data);
-};
-
-exports.getMahasiswaAvailable = async (req, res) => {
-  const { id_tubes, kelas } = req.params;
-  const data = await Kelompok.getMahasiswaAvailable(id_tubes, kelas);
-  res.json(data);
-};
-
-exports.getMahasiswaInKelompok = async (req, res) => {
-  const { id_tubes, kelas } = req.params;
-  const data = await Kelompok.getMahasiswaInKelompok(id_tubes, kelas);
-  res.json(data);
-};
-
-exports.assignMahasiswa = async (req, res) => {
-  const data = await Kelompok.assignMahasiswa(req.body.assignments);
-  res.json({ message: "Mahasiswa berhasil di-assign", data });
-};
-
-exports.updateMaxAnggota = async (req, res) => {
-  const { id_kelompok } = req.params;
-  const { max_anggota } = req.body;
-  const data = await Kelompok.updateMaxAnggota(id_kelompok, max_anggota);
-  res.json({ message: "Max anggota updated", data });
-};
-
-exports.getLockStatus = async (req, res) => {
-  const { id_tubes } = req.params;
-  const data = await Kelompok.getLockStatus(id_tubes);
-  res.json(data);
-};
-
-exports.lockTubes = async (req, res) => {
-  const { id_tubes } = req.params;
-  const data = await Kelompok.lockTubes(id_tubes);
-  res.json({ message: "Tubes berhasil dikunci", data });
-};
-
-exports.unlockTubes = async (req, res) => {
-  const { id_tubes } = req.params;
-  const data = await Kelompok.unlockTubes(id_tubes);
-  res.json({ message: "Tubes berhasil dibuka", data });
+module.exports = {
+  getTubesByMk,
+  fetchKelompokByTubes,
+  fetchKelompokMahasiswa,
+  postJoinKelompok
 };

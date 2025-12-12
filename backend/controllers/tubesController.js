@@ -1,27 +1,24 @@
-const Tubes = require("../models/tubesModel");
+const pool = require("../config/db");
 
-exports.getAllTubes = async (req, res) => {
-  const { id_mk_dibuka } = req.query;  
-  const data = await Tubes.getAll(id_mk_dibuka);
-  res.json(data);
+// Ambil semua topik tugas besar untuk idMkDibuka tertentu
+const getTubesByMkDibukaController = async (req, res) => {
+  const { idMkDibuka } = req.params;
+  try {
+    const query = `
+      SELECT id_tubes, topik_tubes
+      FROM tugas_besar
+      WHERE id_mk_dibuka = $1
+      ORDER BY id_tubes
+    `;
+    const { rows } = await pool.query(query, [idMkDibuka]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Tidak ada topik tugas besar ditemukan" });
+    }
+    res.json({ message: "Topik tugas besar ditemukan", tubes: rows });
+  } catch (err) {
+    console.error("Error getTubesByMkDibukaController:", err);
+    res.status(500).json({ message: "Terjadi kesalahan server" });
+  }
 };
 
-exports.getTubes = async (req, res) => {
-  const data = await Tubes.getById(req.params.id_tubes);
-  res.json(data);
-};
-
-exports.createTubes = async (req, res) => {
-  const data = await Tubes.create(req.body);
-  res.json({ message: "Tubes created", data });
-};
-
-exports.updateTubes = async (req, res) => {
-  const data = await Tubes.update(req.params.id_tubes, req.body);
-  res.json({ message: "Tubes updated", data });
-};
-
-exports.deleteTubes = async (req, res) => {
-  await Tubes.remove(req.params.id_tubes);
-  res.json({ message: "Tubes deleted" });
-};
+module.exports = { getTubesByMkDibukaController };
