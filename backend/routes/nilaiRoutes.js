@@ -7,13 +7,13 @@ const {
   getNilaiByTubes
 } = require("../controllers/nilaiController");
 
-// GET list tubes yang punya nilai
+// GET daftar tubes mahasiswa (optional filter idMk via query)
 router.get("/tubes/:npm", getTubesList);
 
 // GET nilai per tubes
 router.get("/:npm/tubes/:idTubes", getNilaiByTubes);
 
-// GET nilai lengkap (lama)
+// GET nilai lengkap mahasiswa
 router.get("/:npm", getNilaiMahasiswa);
 
 module.exports = router;
