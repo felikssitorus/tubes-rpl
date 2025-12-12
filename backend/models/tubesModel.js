@@ -69,8 +69,6 @@ const remove = async (id_tubes) => {
   return true;
 };
 
-module.exports = { getAll, getById, getByMataKuliahDibuka, create, update, remove };const pool = require("../config/db");
-
 // Ambil semua tugas besar (tubes) berdasarkan email mahasiswa
 const getTubesByEmail = async (email) => {
   const query = `
@@ -88,4 +86,4 @@ const getTubesByEmail = async (email) => {
   return rows;
 };
 
-module.exports = { getTubesByEmail };
+module.exports = { getAll, getById, getByMataKuliahDibuka, create, update, remove, getTubesByEmail };

@@ -68,6 +68,7 @@
 // };
 
 const Tubes = require("../models/tubesModel");
+const pool = require("../config/db");
 
 exports.getAllTubes = async (req, res) => {
   const data = await Tubes.getAll();
@@ -100,10 +101,10 @@ exports.updateTubes = async (req, res) => {
 exports.deleteTubes = async (req, res) => {
   await Tubes.remove(req.params.id_tubes);
   res.json({ message: "Tugas Besar deleted" });
-};const pool = require("../config/db");
+};
 
 // Ambil semua topik tugas besar untuk idMkDibuka tertentu
-const getTubesByMkDibukaController = async (req, res) => {
+exports.getTubesByMkDibukaController = async (req, res) => {
   const { idMkDibuka } = req.params;
   try {
     const query = `
@@ -122,5 +123,3 @@ const getTubesByMkDibukaController = async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 };
-
-module.exports = { getTubesByMkDibukaController };
