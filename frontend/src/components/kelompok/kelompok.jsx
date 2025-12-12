@@ -46,16 +46,19 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
     setIsLocked(false);
 
     try {
-      // Ambil data kelompok dari backend
+      // Ambil seluruh kelompok
       const kel = await axios.get(`${BASE_URL}/tubes/${id_tubes}`);
       setKelompokData(kel.data.kelompok || {});
       setIsLocked(kel.data.tubes_locked || false);
 
-      // Ambil kelompok mahasiswa
+      // Ambil kelompok user
       const myGroup = await axios.get(`${BASE_URL}/tubes/${id_tubes}/mahasiswa/${npm}`);
       if (myGroup.data?.nama_kelompok) {
         setSelectedKelompok(myGroup.data.nama_kelompok);
-        setKelompokSaya(myGroup.data.anggota?.map(a => a.nama) || []);
+
+        // FIX: Data anggota sudah berupa array string → langsung pakai
+        setKelompokSaya(myGroup.data.anggota || []);
+
         setIsLocked(myGroup.data.is_locked || kel.data.tubes_locked || false);
       }
     } catch (err) {
@@ -86,8 +89,12 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
       if (res.data?.message) {
         setSelectedKelompok(kelompokName);
 
-        const anggota = [...(kelompokData()[kelompokName]?.map(a => a.nama) || [])];
+        // FIX: data kelompok adalah array string → tidak .map()
+        const anggota = [...(kelompokData()[kelompokName] || [])];
+
+        // Tambah diri kalau belum ada
         if (!anggota.includes(namaMahasiswa)) anggota.push(namaMahasiswa);
+
         setKelompokSaya(anggota);
 
         alert(res.data.message);
@@ -134,10 +141,11 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
                 value={kelompokName}
                 checked={selectedKelompok() === kelompokName}
                 onChange={() => handleJoinKelompok(kelompokName)}
-                disabled={isLocked()} // 🔒 jika tubes dikunci
+                disabled={isLocked()}
               />
               <span>
-                {kelompokName} {kelompokData()[kelompokName]?.length === 0 ? "(Kosong)" : ""}
+                {kelompokName} 
+                {kelompokData()[kelompokName]?.length === 0 ? " (Kosong)" : ""}
                 {isLocked() ? " 🔒" : ""}
               </span>
             </label>
