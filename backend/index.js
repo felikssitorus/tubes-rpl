@@ -12,25 +12,17 @@ app.get("/", (req, res) => {
 });
 
 // Routes
-const userRoutes = require("./routes/userRoutes");
-app.use("/user", userRoutes);
+app.use("/user", require("./routes/userRoutes"));
+app.use("/mk-diambil", require("./routes/mkDiambilRoutes"));
+app.use("/mengajar", require("./routes/mengajarRoutes"));
+app.use("/kelompok", require("./routes/kelompokRoutes"));
+app.use("/mahasiswa", require("./routes/mahasiswaRoutes"));
+app.use("/tubes", require("./routes/tubesRoutes"));
+app.use("/nilai-mhs", require("./routes/nilaiRoutes"));
 
-const mkDiambilRoutes = require("./routes/mkDiambilRoutes");
-app.use("/mk-diambil", mkDiambilRoutes);
-
-const mengajarRoutes = require("./routes/mengajarRoutes");
-app.use("/mengajar", mengajarRoutes);
-
-const kelompokRoutes = require("./routes/kelompokRoutes");
-app.use("/kelompok", kelompokRoutes);
-
-// Tambahkan routes mahasiswa
-const mahasiswaRoutes = require("./routes/mahasiswaRoutes");
-app.use("/mahasiswa", mahasiswaRoutes);  // <- endpoint: /mahasiswa atau /mahasiswa/:email
-
-// Tambahkan routes tubes
-const tubesRoutes = require("./routes/tubesRoutes");
-app.use("/tubes", tubesRoutes);
+// Tambahkan routes nilai mahasiswa
+const nilaiMhsRoutes = require("./routes/nilaiRoutes");
+app.use("/nilai-mhs", nilaiMhsRoutes); // endpoint: /nilai-mhs/:npm
 
 // Jalankan server
 const PORT = 5000;

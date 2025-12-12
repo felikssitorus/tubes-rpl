@@ -2,26 +2,23 @@ import axios from "axios";
 
 const BASE_URL = "http://localhost:5000/kelompok";
 
-// Ambil semua kelompok + anggota
-export const fetchKelompok = async (idMkDibuka) => {
-  try {
-    const res = await axios.get(`${BASE_URL}/${idMkDibuka}`);
-    return res.data;
-  } catch (err) {
-    console.error("Gagal fetch kelompok:", err);
-    return {};
-  }
+// Ambil seluruh kelompok pada tubes tertentu
+export const getKelompokTubes = async (idTubes) => {
+  const res = await axios.get(`${BASE_URL}/tubes/${idTubes}`);
+  return res.data;
 };
 
-// Ambil kelompok mahasiswa login
-export const fetchKelompokMahasiswa = async (idMkDibuka, npm) => {
-  try {
-    const res = await axios.get(`${BASE_URL}/${idMkDibuka}/mahasiswa/${npm}`);
-    return res.data || null;
-  } catch (err) {
-    console.error("Gagal fetch kelompok mahasiswa:", err);
-    return null;
-  }
+// Ambil kelompok mahasiswa
+export const getKelompokMahasiswa = async (idTubes, npm) => {
+  const res = await axios.get(`${BASE_URL}/tubes/${idTubes}/mahasiswa/${npm}`);
+  return res.data;
 };
 
-// NOTE: jika backend ada endpoint POST untuk join kelompok, tambahkan di sini
+// Join kelompok
+export const joinKelompok = async (idTubes, namaKelompok, npm) => {
+  return axios.post(`${BASE_URL}/join`, {
+    idTubes,
+    namaKelompok,
+    npm
+  });
+};

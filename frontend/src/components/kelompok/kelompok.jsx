@@ -1,4 +1,4 @@
-// File: src/components/Kelompok.jsx
+// File: src/components/kelompok/Kelompok.jsx
 import { createSignal, onMount, For } from "solid-js";
 import axios from "axios";
 
@@ -12,6 +12,7 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
   const [kelompokData, setKelompokData] = createSignal({});
   const [selectedKelompok, setSelectedKelompok] = createSignal("");
   const [kelompokSaya, setKelompokSaya] = createSignal([]);
+  const [isLocked, setIsLocked] = createSignal(false);
 
   if (!npm) {
     alert("Data user tidak ditemukan. Silakan login ulang.");
@@ -42,24 +43,25 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
     setSelectedKelompok("");
     setKelompokSaya([]);
     setKelompokData({});
+    setIsLocked(false);
 
     try {
+      // Ambil data kelompok dari backend
       const kel = await axios.get(`${BASE_URL}/tubes/${id_tubes}`);
-      // Kalau data kosong, buat placeholder agar radio button tetap muncul
-      if (Object.keys(kel.data).length === 0) {
-        setKelompokData({ "Belum ada kelompok": [] });
-      } else {
-        setKelompokData(kel.data);
-      }
+      setKelompokData(kel.data.kelompok || {});
+      setIsLocked(kel.data.tubes_locked || false);
 
+      // Ambil kelompok mahasiswa
       const myGroup = await axios.get(`${BASE_URL}/tubes/${id_tubes}/mahasiswa/${npm}`);
       if (myGroup.data?.nama_kelompok) {
         setSelectedKelompok(myGroup.data.nama_kelompok);
         setKelompokSaya(myGroup.data.anggota?.map(a => a.nama) || []);
+        setIsLocked(myGroup.data.is_locked || kel.data.tubes_locked || false);
       }
     } catch (err) {
       console.error("Gagal load kelompok:", err);
-      setKelompokData({ "Belum ada kelompok": [] });
+      setKelompokData({});
+      setIsLocked(false);
     }
   };
 
@@ -128,13 +130,16 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
             <label class="flex items-center gap-2 cursor-pointer m-0">
               <input
                 type="radio"
-                name={`kelompok-${selectedTubes()}`} // unik per tubes
+                name={`kelompok-${selectedTubes()}`}
                 value={kelompokName}
                 checked={selectedKelompok() === kelompokName}
                 onChange={() => handleJoinKelompok(kelompokName)}
-                disabled={kelompokName === "Belum ada kelompok"} // disable jika placeholder
+                disabled={isLocked()} // 🔒 jika tubes dikunci
               />
-              <span>{kelompokName}</span>
+              <span>
+                {kelompokName} {kelompokData()[kelompokName]?.length === 0 ? "(Kosong)" : ""}
+                {isLocked() ? " 🔒" : ""}
+              </span>
             </label>
           )}
         </For>

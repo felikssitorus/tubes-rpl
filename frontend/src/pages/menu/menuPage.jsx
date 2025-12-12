@@ -5,9 +5,7 @@ import Menu from "../../components/menu/menu";
 import { getCourseInfo } from "../../services/menuService";
 
 const MenuPage = () => {
-  const params = useParams();
-  const { courseCode } = params; // diambil dari URL
-
+  const { courseCode } = useParams();
   const [courseInfo] = createResource(() => courseCode, getCourseInfo);
 
   return (
