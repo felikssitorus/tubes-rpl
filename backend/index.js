@@ -23,6 +23,9 @@ app.use("/nilai-mhs", require("./routes/nilaiRoutes"));
 // Tambahkan routes nilai mahasiswa
 const nilaiMhsRoutes = require("./routes/nilaiRoutes");
 app.use("/nilai-mhs", nilaiMhsRoutes); // endpoint: /nilai-mhs/:npm
+// Tambahkan routes tubes
+const tubesRoutes = require("./routes/tubesRoutes");
+app.use("/tubes", tubesRoutes);
 
 // Jalankan server
 const PORT = 5000;

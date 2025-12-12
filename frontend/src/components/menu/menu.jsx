@@ -5,23 +5,28 @@ const Menu = ({ courseInfo }) => {
   const navigate = useNavigate();
 
   const handleClick = (menu) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const npm = user?.npm?.trim(); // <-- TRIM
+    const idMk = courseInfo?.idMkDibuka;
+
+    if (!npm || !idMk) {
+      console.error("npm atau idMk tidak valid");
+      return;
+    }
+
     switch (menu.page) {
       case "pembagian-kelompok":
-        navigate(`/kelompok/${courseInfo.idMkDibuka}`);
+        navigate(`/kelompok/${idMk}`);
         break;
       case "nilai":
-        const user = JSON.parse(localStorage.getItem("user")); // ambil object user
-        if (user && user.npm) {
-          navigate(`/nilai/${user.npm}`);
-        } else {
-          console.error("NPM user tidak ditemukan di localStorage");
-        }
+        navigate(`/nilai/${encodeURIComponent(npm)}/${idMk}`);
         break;
       default:
-        console.warn(`Halaman ${menu.page} belum di-handle`);
+        console.warn(`Halaman "${menu.page}" belum di-handle`);
         break;
     }
   };
+
 
   return (
     <div class="container p-6 w-full text-left">

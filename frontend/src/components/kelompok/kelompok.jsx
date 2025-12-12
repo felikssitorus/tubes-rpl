@@ -1,4 +1,3 @@
-// File: src/components/kelompok/Kelompok.jsx
 import { createSignal, onMount, For } from "solid-js";
 import axios from "axios";
 
@@ -8,36 +7,24 @@ const TUBES_URL = "http://localhost:5000/tubes/mk";
 const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
   const [tubesList, setTubesList] = createSignal([]);
   const [selectedTubes, setSelectedTubes] = createSignal("");
-
   const [kelompokData, setKelompokData] = createSignal({});
   const [selectedKelompok, setSelectedKelompok] = createSignal("");
   const [kelompokSaya, setKelompokSaya] = createSignal([]);
   const [isLocked, setIsLocked] = createSignal(false);
 
-  if (!npm) {
-    alert("Data user tidak ditemukan. Silakan login ulang.");
-  }
+  if (!npm) alert("Data user tidak ditemukan. Silakan login ulang.");
 
-  // ===============================
-  // LOAD LIST TUBES BERDASARKAN MK
-  // ===============================
   onMount(async () => {
     if (!idMkDibuka) return;
-
     try {
       const tubesRes = await axios.get(`${TUBES_URL}/${idMkDibuka}`);
-      if (tubesRes.data?.tubes) {
-        setTubesList(tubesRes.data.tubes);
-      }
+      setTubesList(tubesRes.data?.tubes || []);
     } catch (err) {
       console.error("Gagal mengambil data tubes:", err);
       alert("Gagal mengambil daftar topik tubes.");
     }
   });
 
-  // =========================
-  // SAAT USER PILIH TUBES
-  // =========================
   const handleSelectTubes = async (id_tubes) => {
     setSelectedTubes(id_tubes);
     setSelectedKelompok("");
@@ -51,11 +38,10 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
       setKelompokData(kel.data.kelompok || {});
       setIsLocked(kel.data.tubes_locked || false);
 
-      // Ambil kelompok mahasiswa
       const myGroup = await axios.get(`${BASE_URL}/tubes/${id_tubes}/mahasiswa/${npm}`);
       if (myGroup.data?.nama_kelompok) {
         setSelectedKelompok(myGroup.data.nama_kelompok);
-        setKelompokSaya(myGroup.data.anggota?.map(a => a.nama) || []);
+        setKelompokSaya(myGroup.data.anggota || []);
         setIsLocked(myGroup.data.is_locked || kel.data.tubes_locked || false);
       }
     } catch (err) {
@@ -65,15 +51,8 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
     }
   };
 
-  // =========================
-  // JOIN KELOMPOK
-  // =========================
   const handleJoinKelompok = async (kelompokName) => {
-    if (!selectedTubes() || !kelompokName || !npm) {
-      alert("Data untuk join kelompok tidak lengkap!");
-      return;
-    }
-
+    if (!selectedTubes() || !kelompokName || !npm) return;
     if (kelompokName === selectedKelompok()) return;
 
     try {
@@ -82,27 +61,22 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
         namaKelompok: kelompokName,
         npm
       });
-
       if (res.data?.message) {
         setSelectedKelompok(kelompokName);
-
-        const anggota = [...(kelompokData()[kelompokName]?.map(a => a.nama) || [])];
+        const anggota = [...(kelompokData()[kelompokName] || [])];
         if (!anggota.includes(namaMahasiswa)) anggota.push(namaMahasiswa);
         setKelompokSaya(anggota);
-
         alert(res.data.message);
       }
     } catch (err) {
       console.error("Gagal join kelompok:", err);
-      const msg = err.response?.data?.message || "Terjadi kesalahan saat join kelompok";
+      const msg = err.response?.data?.error || "Terjadi kesalahan saat join kelompok";
       alert(msg);
     }
   };
 
   return (
     <div class="container mx-auto p-6 flex flex-col">
-
-      {/* Dropdown Topik Tubes */}
       <div class="w-8/9 max-w-5xl">
         <select
           class="w-full p-2 border border-black rounded"
@@ -111,9 +85,7 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
         >
           <option value="" disabled>Pilih Topik Tugas Besar</option>
           <For each={tubesList()}>
-            {(tube) => (
-              <option value={tube.id_tubes}>{tube.topik_tubes}</option>
-            )}
+            {(tube) => <option value={tube.id_tubes}>{tube.topik_tubes}</option>}
           </For>
         </select>
       </div>
@@ -123,7 +95,6 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
         Pembagian Kelompok Tugas Besar
       </h1>
 
-      {/* Radio Kelompok */}
       <div class="menu-item w-8/9 max-w-5xl flex flex-col gap-2 p-4 border border-black">
         <For each={Object.keys(kelompokData())}>
           {(kelompokName) => (
@@ -134,10 +105,10 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
                 value={kelompokName}
                 checked={selectedKelompok() === kelompokName}
                 onChange={() => handleJoinKelompok(kelompokName)}
-                disabled={isLocked()} // 🔒 jika tubes dikunci
+                disabled={isLocked()}
               />
               <span>
-                {kelompokName} {kelompokData()[kelompokName]?.length === 0 ? "(Kosong)" : ""}
+                {kelompokName} {kelompokData()[kelompokName]?.length === 0 ? "" : ""}
                 {isLocked() ? " 🔒" : ""}
               </span>
             </label>
@@ -145,7 +116,6 @@ const Kelompok = ({ idMkDibuka, namaMahasiswa, npm }) => {
         </For>
       </div>
 
-      {/* Kelompok Saya */}
       <div class="mt-4">
         <h2 class="menu-item w-8/9 max-w-5xl text-white font-semibold
         bg-[#637AB9] p-4 mb-0">

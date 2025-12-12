@@ -4,7 +4,7 @@ const {
   getNilaiByNpmAndTubes
 } = require("../models/nilaiModel");
 
-// existing controller
+// GET nilai lengkap mahasiswa
 const getNilaiMahasiswa = async (req, res) => {
   const { npm } = req.params;
   try {
@@ -16,28 +16,26 @@ const getNilaiMahasiswa = async (req, res) => {
   }
 };
 
-// ================================================
-// 1️⃣ GET daftar tubes yang punya nilai
-// ================================================
+// GET daftar tubes mahasiswa berdasarkan mata kuliah (optional filter idMk)
 const getTubesList = async (req, res) => {
   const { npm } = req.params;
+  const { idMk } = req.query; // bisa dikirim via ?idMk=2
+
   try {
-    const rows = await getTubesWithNilai(npm);
-    res.json(rows);
+    const tubes = await getTubesWithNilai(npm, idMk);
+    res.json(tubes);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
   }
 };
 
-// ================================================
-// 2️⃣ GET nilai berdasarkan tubes tertentu
-// ================================================
+// GET nilai berdasarkan tubes tertentu
 const getNilaiByTubes = async (req, res) => {
   const { npm, idTubes } = req.params;
   try {
-    const rows = await getNilaiByNpmAndTubes(npm, idTubes);
-    res.json(rows);
+    const nilai = await getNilaiByNpmAndTubes(npm, idTubes);
+    res.json(nilai);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
