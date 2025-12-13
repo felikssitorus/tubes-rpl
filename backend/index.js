@@ -24,6 +24,10 @@ app.use("/mengajar", mengajarRoutes);
 const kelompokRoutes = require("./routes/kelompokRoutes");
 app.use("/kelompok", kelompokRoutes);
 
+// Tambahkan routes admin
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/api/admin", adminRoutes);
+
 // Tambahkan routes mahasiswa
 const mahasiswaRoutes = require("./routes/mahasiswaRoutes");
 app.use("/mahasiswa", mahasiswaRoutes);  // <- endpoint: /mahasiswa atau /mahasiswa/:email
