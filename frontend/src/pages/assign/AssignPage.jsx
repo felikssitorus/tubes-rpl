@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "@solidjs/router";
 import toast, { Toaster } from "solid-toast";
 
 import { getMahasiswaAvailable, assignMahasiswa } from "../../services/assignMahasiswaService";
-import { getKelompokByTubes } from "../../services/kelompokService";
+import { getAllKelompokByTubes } from "../../services/kelompokDosenService";
 import Header from "../../components/layout/Header";
 
 export default function AssignPage() {
@@ -15,7 +15,7 @@ export default function AssignPage() {
   const [mahasiswaData, { refetch: refetchMahasiswa }] = createResource(
     () => getMahasiswaAvailable(idTubes(), kelas)
   );
-  const [kelompokData, { refetch: refetchKelompok }] = createResource(() => getKelompokByTubes(idTubes()));
+  const [kelompokData, { refetch: refetchKelompok }] = createResource(() => getAllKelompokByTubes(idTubes()));
   
   const [selectedKelompok, setSelectedKelompok] = createSignal(null);
   const [selectedMahasiswa, setSelectedMahasiswa] = createSignal([]);

@@ -72,12 +72,6 @@ const postJoinKelompok = async (req, res) => {
   try {
     const { idTubes, namaKelompok, npm } = req.body;
 
-    // ambil id_kelompok
-    const idKelQuery = `SELECT id_kelompok FROM kelompok WHERE id_tubes = $1 AND nama_kelompok = $2`;
-    const { rows } = await db.query(idKelQuery, [idTubes, namaKelompok]);
-    if (!rows[0]) return res.status(404).json({ error: "Kelompok tidak ditemukan" });
-    const idKelompok = rows[0].id_kelompok;
-
     // cek apakah tubes sudah dikunci
     const lockQuery = `SELECT is_locked FROM tugas_besar WHERE id_tubes = $1`;
     const lockRes = await db.query(lockQuery, [idTubes]);
@@ -85,24 +79,47 @@ const postJoinKelompok = async (req, res) => {
       return res.status(403).json({ error: "Tugas besar sudah dikunci, tidak bisa join kelompok" });
     }
 
-    // insert anggota
+    // ambil id_kelompok dan cek kapasitas
+    const kelompokQuery = `
+      SELECT k.id_kelompok, k.max_anggota, COUNT(ak.npm) as jumlah_anggota
+      FROM kelompok k
+      LEFT JOIN anggota_kelompok ak ON k.id_kelompok = ak.id_kelompok
+      WHERE k.id_tubes = $1 AND k.nama_kelompok = $2
+      GROUP BY k.id_kelompok, k.max_anggota
+    `;
+    const { rows } = await db.query(kelompokQuery, [idTubes, namaKelompok]);
+    
+    if (!rows[0]) {
+      return res.status(404).json({ error: "Kelompok tidak ditemukan" });
+    }
+
+    const { id_kelompok: idKelompok, max_anggota, jumlah_anggota } = rows[0];
+
+    // Cek apakah kelompok sudah penuh
+    if (parseInt(jumlah_anggota) >= parseInt(max_anggota)) {
+      return res.status(400).json({ error: "Kelompok sudah penuh, tidak bisa join" });
+    }
+
+    // HAPUS DULU dari kelompok lama di tubes yang sama
+    await db.query(`
+      DELETE FROM anggota_kelompok 
+      WHERE npm = $1 
+      AND id_kelompok IN (
+        SELECT id_kelompok FROM kelompok WHERE id_tubes = $2
+      )
+    `, [npm, idTubes]);
+
+    // insert anggota ke kelompok baru
     const insertQuery = `
       INSERT INTO anggota_kelompok (npm, id_kelompok)
       VALUES ($1, $2)
-      ON CONFLICT (npm, id_kelompok) DO NOTHING
     `;
     await db.query(insertQuery, [npm, idKelompok]);
-    res.json({ message: `Berhasil join ke ${namaKelompok}` });
+    
+    res.json({ message: `Berhasil pindah ke ${namaKelompok}` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-};
-
-module.exports = {
-  getTubesByMk,
-  fetchKelompokByTubes,
-  fetchKelompokMahasiswa,
-  postJoinKelompok
 };
 
 module.exports = {

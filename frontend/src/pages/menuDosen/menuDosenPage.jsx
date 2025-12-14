@@ -1,9 +1,8 @@
 import { createResource } from "solid-js";
 import { useParams, useNavigate } from "@solidjs/router";
-import { getTubes } from"../../services/TubesService";
-
-// ✅ BENAR - Header juga naik 2 level
+import { getTubes } from "../../services/TubesService";
 import Header from "../../components/layout/Header";
+
 export default function TubesMenuPage() {
   const params = useParams();
   const navigate = useNavigate();
@@ -12,19 +11,16 @@ export default function TubesMenuPage() {
 
   const menus = [
     { 
-      title: "Komponen Penilaian", 
-      path: `/tubes/${params.id_tubes}/komponen`,
-      color: "from-blue-500 to-blue-600"
+      title: "KELOLA KELOMPOK TUGAS BESAR", 
+      path: `/dosen/tubes/${params.id_tubes}/kelompok`,
     },
     { 
-      title: "Daftar Kelompok", 
-      path: `/tubes/${params.id_tubes}/kelompok`,
-      color: "from-green-500 to-green-600"
+      title: "KELOLA KOMPONEN PENILAIAN", 
+      path: `/dosen/tubes/${params.id_tubes}/komponen`,
     },
     { 
-      title: "Input Nilai",
-      path: `/tubes/${params.id_tubes}/nilai`,
-      color: "from-orange-500 to-orange-600"
+      title: "PENILAIAN", 
+      path: `/dosen/tubes/${params.id_tubes}/nilai`,
     },
   ];
 
@@ -32,28 +28,20 @@ export default function TubesMenuPage() {
     <div class="min-h-screen bg-gray-50 font-sans">
       <Header />
 
-      <main class="max-w-6xl mx-auto px-4 pt-6 pb-20">
+      <main class="px-4 pt-6 pb-20">
         <div class="mb-8">
-          {/* <button 
-            onClick={() => navigate(`/matkul/${tubes()?.id_matkul}/tubes`)}
-            class="text-[#465EBE] hover:underline text-sm mb-2 flex items-center gap-1"
-          >
-            ← Kembali ke Daftar Tubes
-          </button> */}
           <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-            {tubes()?.nama_matkul} - {tubes()?.nama_tubes}
+            MATA KULIAH : {tubes()?.nama_mata_kuliah || "Loading..."}
           </h2>
-          <h1 class="text-2xl font-bold text-[#465EBE]">Menu Tubes</h1>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="flex flex-col items-center gap-4 max-w-4xl mx-auto">
           {menus.map((menu) => (
             <button
               onClick={() => navigate(menu.path)}
-              class={`bg-gradient-to-br ${menu.color} text-white p-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 text-left`}
+              class="w-full bg-[#5a72d4] hover:bg-[#4a62c4] text-white py-5 px-6 rounded-xl font-semibold text-center uppercase transition-all shadow-md hover:shadow-lg"
             >
-              <div class="text-5xl mb-4">{menu.icon}</div>
-              <h3 class="text-2xl font-bold">{menu.title}</h3>
+              {menu.title}
             </button>
           ))}
         </div>

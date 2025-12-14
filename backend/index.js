@@ -11,24 +11,23 @@ app.get("/", (req, res) => {
   res.json({ message: "Backend berjalan!" });
 });
 
-// Routes
+// Routes untuk mahasiswa
 app.use("/user", require("./routes/userRoutes"));
 app.use("/mk-diambil", require("./routes/mkDiambilRoutes"));
-app.use("/mengajar", require("./routes/mengajarRoutes"));
-app.use("/kelompok", require("./routes/kelompokRoutes"));
 app.use("/mahasiswa", require("./routes/mahasiswaRoutes"));
-app.use("/tubes", require("./routes/tubesRoutes"));
+app.use("/kelompok", require("./routes/kelompokRoutes"));
 app.use("/nilai-mhs", require("./routes/nilaiRoutes"));
+app.use("/tubes", require("./routes/tubesRoutes"));
 
-// Tambahkan routes nilai mahasiswa
-const nilaiMhsRoutes = require("./routes/nilaiRoutes");
-app.use("/nilai-mhs", nilaiMhsRoutes); // endpoint: /nilai-mhs/:npm
-// Tambahkan routes tubes
-const tubesRoutes = require("./routes/tubesRoutes");
-app.use("/tubes", tubesRoutes);
+// Routes untuk dosen
+app.use("/api/mengajar", require("./routes/mengajarRoutes"));
+app.use("/api/komponen", require("./routes/komponenRoutes"));
+app.use("/api/kelompok-dosen", require("./routes/kelompokDosenRoutes"));
+app.use("/api/matkul", require("./routes/matkulRoutes"));
+app.use("/api/tubes-dosen", require("./routes/tubesDosenRoutes")); // route untuk tubes dosen
 
 // Jalankan server
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server berjalan di http://localhost:${PORT}`);
 });

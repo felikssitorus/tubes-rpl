@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/api/tubes";
+const API_URL = "http://localhost:5000/api/tubes-dosen";
 
 export const getAllTubes = async (id_mk_dibuka = null) => {
   const url = id_mk_dibuka ? `${API_URL}?id_mk_dibuka=${id_mk_dibuka}` : API_URL;

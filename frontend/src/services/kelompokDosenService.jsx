@@ -71,7 +71,6 @@ export const createKelompok = async (data) => {
   });
   
   const responseData = await res.json();
-  
   return responseData;
 };
 
@@ -83,7 +82,6 @@ export const updateKelompok = async (id, data) => {
   });
   
   const responseData = await res.json();
-  
   return responseData;
 };
 

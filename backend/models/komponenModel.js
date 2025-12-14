@@ -1,41 +1,48 @@
 const pool = require("../config/db");
 
-// GET all komponen
 const getAll = async () => {
   const result = await pool.query("SELECT * FROM komponen ORDER BY id_komponen ASC");
   return result.rows;
 };
 
-// GET komponen by ID
 const getById = async (id) => {
   const result = await pool.query("SELECT * FROM komponen WHERE id_komponen = $1", [id]);
   return result.rows[0];
 };
 
-// CREATE komponen
-const create = async (data) => {
-  const maxIdQuery = await pool.query("SELECT MAX(id_komponen) as max_id FROM komponen");
-  const nextId = (maxIdQuery.rows[0].max_id || 0) + 1;
+const getTotalBobot = async (id_tubes) => {
   const result = await pool.query(
-    "INSERT INTO komponen (id_komponen, nama_komponen, bobot_komponen, id_tubes) VALUES ($1, $2, $3, $4) RETURNING *",
-    [nextId, data.nama_komponen, data.bobot_komponen, data.id_tubes]
+    "SELECT COALESCE(SUM(bobot_komponen), 0) as total FROM komponen WHERE id_tubes = $1",
+    [id_tubes]
   );
+  return parseFloat(result.rows[0].total);
+};
+
+const create = async (data) => {
+  if (!data.id_tubes || !data.nama_komponen || !data.bobot_komponen) {
+    throw new Error("Missing required fields");
+  }
+  
+  const result = await pool.query(
+    "INSERT INTO komponen (id_tubes, nama_komponen, bobot_komponen, catatan) VALUES ($1, $2, $3, $4) RETURNING *",
+    [data.id_tubes, data.nama_komponen, data.bobot_komponen, data.catatan || null]
+  );
+  
   return result.rows[0];
 };
 
-// UPDATE komponen
 const update = async (id_komponen, data) => {
   const result = await pool.query(
-    "UPDATE komponen SET nama_komponen=$1, bobot_komponen=$2, id_tubes=$3 WHERE id_komponen=$4 RETURNING *",
-    [data.nama_komponen, data.bobot_komponen, data.id_tubes, id_komponen]
+    "UPDATE komponen SET nama_komponen=$1, bobot_komponen=$2, catatan=$3, id_tubes=$4 WHERE id_komponen=$5 RETURNING *",
+    [data.nama_komponen, data.bobot_komponen, data.catatan || null, data.id_tubes, id_komponen]
   );
+  
   return result.rows[0];
 };
 
-// DELETE komponen
 const remove = async (id_komponen) => {
-  await pool.query("DELETE FROM komponen WHERE id_komponen = $1", [id_komponen]);
-  return true;
+  const result = await pool.query("DELETE FROM komponen WHERE id_komponen = $1 RETURNING *", [id_komponen]);
+  return result.rowCount > 0;
 };
 
-module.exports = { getAll, getById, create, update, remove };
+module.exports = { getAll, getById, getTotalBobot, create, update, remove };

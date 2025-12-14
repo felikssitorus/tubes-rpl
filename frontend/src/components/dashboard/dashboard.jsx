@@ -14,9 +14,7 @@ const Dashboard = (props) => {
             <div
               class="class-card flex flex-col h-40 rounded-lg shadow-lg hover:shadow-2xl cursor-pointer transition-all duration-300 transform hover:-translate-y-1"
               style="background: linear-gradient(to bottom, #465EBE, #212C58);"
-              onClick={() =>
-                navigate(`/menu/${encodeURIComponent(mk.nama_mata_kuliah)}`)
-              }
+              onClick={() => navigate(`/menu/${mk.id_mk_dibuka}`)} // Pakai id_mk_dibuka
             >
               <div class="flex-1 flex items-center justify-center font-bold text-white text-lg px-2 text-center">
                 {mk.nama_mata_kuliah}

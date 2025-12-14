@@ -3,31 +3,23 @@ import { createSignal, createEffect } from "solid-js";
 export default function TubesModal(props) {
   const { open, data, onClose, onSave } = props;
 
-  const [namaTubes, setNamaTubes] = createSignal("");
-  const [tahunAjaran, setTahunAjaran] = createSignal("");
-  const [semester, setSemester] = createSignal("");
+  const [topikTubes, setTopikTubes] = createSignal("");
 
   createEffect(() => {
     if (props.open) {
       if (props.data) {
         // Mode edit
-        setNamaTubes(props.data.nama_tubes || "");
-        setTahunAjaran(props.data.tahun_ajaran || "");
-        setSemester(props.data.semester || "");
+        setTopikTubes(props.data.topik_tubes || "");
       } else {
         // Mode tambah
-        setNamaTubes("");
-        setTahunAjaran("");
-        setSemester("");
+        setTopikTubes("");
       }
     }
   });
 
   const handleSubmit = () => {
     onSave({
-      nama_tubes: namaTubes(),
-      tahun_ajaran: tahunAjaran(),
-      semester: semester(),
+      topik_tubes: topikTubes(),
     });
   };
 
@@ -42,36 +34,13 @@ export default function TubesModal(props) {
         </h2>
 
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Nama Tubes</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Topik Tubes</label>
           <input
             class="border border-gray-300 p-2.5 w-full rounded-lg focus:ring-2 focus:ring-[#465EBE] focus:border-[#465EBE] outline-none"
-            value={namaTubes()}
-            onInput={(e) => setNamaTubes(e.target.value)}
-            placeholder="Contoh: Tubes 1"
+            value={topikTubes()}
+            onInput={(e) => setTopikTubes(e.target.value)}
+            placeholder="Contoh: Sistem Informasi Perpustakaan"
           />
-        </div>
-
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Ajaran</label>
-          <input
-            class="border border-gray-300 p-2.5 w-full rounded-lg focus:ring-2 focus:ring-[#465EBE] focus:border-[#465EBE] outline-none"
-            value={tahunAjaran()}
-            onInput={(e) => setTahunAjaran(e.target.value)}
-            placeholder="Contoh: 2025/2026"
-          />
-        </div>
-
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
-          <select
-            class="border border-gray-300 p-2.5 w-full rounded-lg focus:ring-2 focus:ring-[#465EBE] focus:border-[#465EBE] outline-none"
-            value={semester()}
-            onChange={(e) => setSemester(e.target.value)}
-          >
-            <option value="">Pilih Semester</option>
-            <option value="Ganjil">Ganjil</option>
-            <option value="Genap">Genap</option>
-          </select>
         </div>
 
         <div class="flex justify-end gap-3 mt-4">

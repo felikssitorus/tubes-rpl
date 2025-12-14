@@ -8,9 +8,8 @@ export default function MatkulListPage() {
   const navigate = useNavigate();
   const [data] = createResource(getAllMatkul);
 
-  const handleCardClick = (item) => {
-    // Navigate ke tubes dengan id_mk_dibuka
-    navigate(`/matkul/${item.id_mk_dibuka}/tubes`);
+  const handleCardClick = (matkul) => {
+    navigate(`/dosen/matkul/${matkul.id_mk_dibuka}/tubes`);
   };
 
   return (

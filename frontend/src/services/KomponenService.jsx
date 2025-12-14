@@ -1,29 +1,46 @@
-const API_URL = "http://localhost:5000/komponen";
+const API_URL = "http://localhost:5000/api/komponen";
 
-export async function getAllKomponen() {
-  const res = await fetch(API_URL);
+export const getAllKomponen = async (id_tubes) => {
+  const url = id_tubes ? `${API_URL}?id_tubes=${id_tubes}` : API_URL;
+  const res = await fetch(url);
   return res.json();
-}
+};
 
-export async function createKomponen(data) {
+export const getKomponen = async (id) => {
+  const res = await fetch(`${API_URL}/${id}`);
+  return res.json();
+};
+
+export const createKomponen = async (data) => {
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
-  return res.json();
-}
+  const responseData = await res.json();
+  if (!res.ok) {
+    throw responseData;
+  }
+  return responseData;
+};
 
-export async function updateKomponen(id, data) {
+export const updateKomponen = async (id, data) => {
   const res = await fetch(`${API_URL}/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
-  return res.json();
-}
+  const responseData = await res.json();
+  if (!res.ok) {
+    throw responseData;
+  }
+  return responseData;
+};
 
-export async function deleteKomponen(id) {
-  const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+export const deleteKomponen = async (id) => {
+  const res = await fetch(`${API_URL}/${id}`, {
+    method: "DELETE",
+  });
+  
   return res.json();
-}
+};

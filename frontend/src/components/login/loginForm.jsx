@@ -16,17 +16,26 @@ export default function LoginForm() {
     try {
       const response = await loginUser(email(), password());
 
-      // SIMPAN USER LOGIN DI LOCAL STORAGE
-      localStorage.setItem("user", JSON.stringify({
+      const userData = {
         name: response.user.name,
         email: response.user.email,
-        npm: response.user.npm.trim() // hapus spasi
-      }));
+        role: response.user.role 
+      };
 
-      toast.success(`Selamat datang, ${response.user.name}`);
+      if (response.user.npm) {
+        userData.npm = response.user.npm.trim();
+      }
+      if (response.user.nip) {
+        userData.nip = response.user.nip.trim();
+      }
 
-      // redirect ke dashboard
-      navigate("/dashboard");
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      if (response.user.role === 'dosen') {
+        navigate("/dosen/matkul");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       toast.error(err.message || "Login gagal");
     } finally {

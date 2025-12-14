@@ -1,9 +1,15 @@
 const pool = require("../config/db");
 
-// Ambil daftar mata kuliah yang diambil mahasiswa berdasarkan email user
 const getMkDiambilByEmail = async (email) => {
   const query = `
-    SELECT m.nama AS nama_mahasiswa, mk.nama_mata_kuliah, mkd.semester, mkd.tahun, mkd.kelas
+    SELECT 
+      m.nama AS nama_mahasiswa, 
+      mk.id_mata_kuliah,
+      mk.nama_mata_kuliah, 
+      mkd.id_mk_dibuka,
+      mkd.semester, 
+      mkd.tahun, 
+      mkd.kelas
     FROM users u
     JOIN mahasiswa m ON u.email = m.email
     JOIN mengambil amb ON amb.npm = m.npm

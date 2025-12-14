@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/kelompok";
+const API_URL = "http://localhost:5000/api/kelompok-dosen";
 
 export async function getMahasiswaByKelas(kelas) {
   const res = await fetch(`${API_URL}/mahasiswa/kelas/${kelas}`);

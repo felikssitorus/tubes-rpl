@@ -111,7 +111,7 @@ export default function KelolaKelompokDosenPage() {
       toast.error("Kelompok sudah dikunci! Tidak bisa melakukan assign.");
       return;
     }
-    navigate(`/kelompok/${idTubes()}/assign`);
+    navigate(`/dosen/kelompok/${idTubes()}/assign`);
   };
 
   const handleViewDetail = async (id_kelompok) => {

@@ -1,19 +1,17 @@
-const API_URL = "http://localhost:5000/mengajar";
+const API_URL = "http://localhost:5000/api/mengajar";
 
-export async function getCourseInfo(courseCode) {
+
+
+export async function getCourseInfo(idMkDibuka) {
   try {
     const res = await fetch(API_URL);
     if (!res.ok) throw new Error("Gagal mengambil data dari server");
 
     const data = await res.json();
 
-    // Decode nama mata kuliah dari URL
-    const decodedCourseCode = decodeURIComponent(courseCode).trim();
-
-    // Filter dosen berdasarkan nama mata kuliah (case-insensitive)
+    // Filter dosen berdasarkan id_mk_dibuka
     const course = data.filter(
-      (item) =>
-        item.nama_mata_kuliah.toLowerCase() === decodedCourseCode.toLowerCase()
+      (item) => item.id_mk_dibuka === parseInt(idMkDibuka)
     );
 
     if (course.length === 0) throw new Error("Mata kuliah tidak ditemukan");
@@ -21,8 +19,8 @@ export async function getCourseInfo(courseCode) {
     // ambil nama dosen
     const dosen = course.map((item) => item.nama);
 
-    // ambil id mk dibuka
-    const idMkDibuka = course[0].id_mk_dibuka;
+    // ambil nama mata kuliah
+    const namaMataKuliah = course[0].nama_mata_kuliah;
 
     // menu
     const menus = [
@@ -31,10 +29,10 @@ export async function getCourseInfo(courseCode) {
     ];
 
     return {
-      courseCode: decodedCourseCode,
+      courseCode: namaMataKuliah,
       dosen,
       menus,
-      idMkDibuka,
+      idMkDibuka: parseInt(idMkDibuka),
     };
   } catch (err) {
     throw err;
