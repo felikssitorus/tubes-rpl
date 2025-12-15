@@ -14,6 +14,8 @@ import TubesMenuPage from "./pages/menuDosen/menuDosenPage";
 import KomponenPage from "./pages/komponen/KomponenPage";
 import KelolaKelompokDosenPage from "./pages/kelolaKelompokDosen/KelolaKelompokDosenPage";
 import DosenAssignPage from "./pages/assign/AssignPage";
+import NilaiDosenPage from "./pages/nilai/nilaiDosenPage.jsx";
+// import FormNilaiKelompokPage from "./pages/nilai/FormNilaiKelompokPage";
 
 export default function App() {
   return (
@@ -35,6 +37,8 @@ export default function App() {
       <Route path="/dosen/tubes/:id_tubes/komponen" component={KomponenPage} />
       <Route path="/dosen/tubes/:id_tubes/kelompok" component={KelolaKelompokDosenPage} />
       <Route path="/dosen/kelompok/:id_tubes/assign" component={DosenAssignPage} />
+      <Route path="/dosen/tubes/:idTubes/nilai" component={NilaiDosenPage} />
+      {/* <Route path="/dosen/tubes/:idTubes/nilai/:idKelompok" component={FormNilaiKelompokPage} /> */}
     </Router>
   );
 }
